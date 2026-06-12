@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/surface_dark"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/card_stroke"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp">
+
+        <!-- Zodiac badge -->
+        <FrameLayout
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="14dp">
+
+            <View
+                android:id="@+id/viewSignBadge"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/zodiac_badge_bg" />
+
+            <TextView
+                android:id="@+id/textSignGlyph"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="26sp"
+                android:textColor="#FFFFFF" />
+
+        </FrameLayout>
+
+        <!-- Text content -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/textName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Global badge -->
+                <TextView
+                    android:id="@+id/textGlobal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="🌍"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textSunSign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/gold"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/textDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/textDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/textTags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/accent_purple"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/textLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Arrow -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="›"
+            android:textColor="@color/text_secondary"
+            android:textSize="22sp"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

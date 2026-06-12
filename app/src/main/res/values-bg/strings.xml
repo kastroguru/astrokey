@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Астро Ключ</string>
+    <string name="widget_description">Показва текущите позиции на планетите на началния екран</string>
+
+    <!-- Navigation -->
+    <string name="birth_data">Рождени данни</string>
+    <string name="history_events">Събития</string>
+    <string name="now">Сега</string>
+    <string name="transits">Транзити</string>
+
+    <!-- Birth Data -->
+    <string name="add_birth_data">Нова карта</string>
+    <string name="birth_data_detail">Детайли</string>
+    <string name="no_birth_data">Няма рождени данни. Натиснете + за добавяне.</string>
+    <string name="natal_chart">Натален хороскоп</string>
+    <string name="planet_positions">Позиции на планетите</string>
+    <string name="house_cusps">Куспиди на домовете</string>
+    <string name="view_chart">Хороскоп</string>
+    <string name="view_table">Таблица</string>
+    <string name="edit_birth_data">Редактирай</string>
+    <string name="recalculate_update">Преизчисли и запази</string>
+
+    <!-- Events -->
+    <string name="add_event">Ново събитие</string>
+    <string name="event_detail">Детайли</string>
+    <string name="no_events">Няма събития. Натиснете + за добавяне.</string>
+    <string name="event_name">Събитие</string>
+    <string name="description">Описание</string>
+    <string name="tags">Тагове</string>
+    <string name="tags_hint">Тагове (разделени със запетая)</string>
+    <string name="global_event_label">Глобално събитие</string>
+    <string name="global_event">Глобално събитие</string>
+    <string name="personal_event">Лично събитие</string>
+    <string name="no_description">Без описание</string>
+    <string name="no_tags">Без тагове</string>
+
+    <!-- Form -->
+    <string name="name">Имe</string>
+    <string name="date">Дата</string>
+    <string name="time">Час</string>
+    <string name="city">Град</string>
+    <string name="country">Държава (по избор)</string>
+    <string name="timezone">Часова зона</string>
+    <string name="search_city">Търси град</string>
+    <string name="select_location">Избери местоположение</string>
+    <string name="calculate_and_save">Изчисли и запази</string>
+    <string name="location_selected" formatted="false">Местоположение: %.4f, %.4f</string>
+    <string name="timezone_select_first">Часова зона: изберете местоположение</string>
+    <string name="timezone_detected">Часова зона: %1$s</string>
+    <string name="timezone_auto">Часова зона: %1$s (автоматично)</string>
+    <string name="timezone_not_detected">Часовата зона не може да бъде определена — моля преизберете местоположението.</string>
+    <string name="enter_city_name">Въведете град</string>
+
+    <!-- Now -->
+    <string name="latitude">Географска ширина</string>
+    <string name="longitude">Географска дължина</string>
+    <string name="set_location">Задай местоположение</string>
+    <string name="refresh">Обнови</string>
+
+    <!-- Table -->
+    <string name="planet">Планета</string>
+    <string name="sign">Знак</string>
+    <string name="degree">Градус</string>
+    <string name="house">Д</string>
+    <string name="all">Всички</string>
+
+    <string name="tap_for_details">↗ натиснете за детайли</string>
+
+    <!-- Transit chart -->
+    <string name="house_row_label">дом</string>
+    <string name="active_aspects">Активни аспекти</string>
+    <string name="refresh_now">↻ Сега</string>
+    <string name="now_live_label"> (сега)</string>
+    <string name="pd_method_transits">Транзити</string>
+    <string name="pd_method_directions">Примарни дирекции</string>
+    <string name="legend_directed_aspects">Дирекции на %1$s</string>
+    <string name="source_code">Изходен код (AGPL-3.0)</string>
+
+    <!-- Aspect names -->
+    <string name="aspect_conjunction">Конюнкция</string>
+    <string name="aspect_sextile">Секстил</string>
+    <string name="aspect_square">Квадрат</string>
+    <string name="aspect_trine">Тригон</string>
+    <string name="aspect_quincunx">Квинкунс</string>
+    <string name="aspect_opposition">Опозиция</string>
+    <string name="orb_format">орб %1$s°</string>
+    <string name="applying">▶ приближаващ</string>
+    <string name="separating">◀ отдалечаващ</string>
+
+    <!-- Dialogs -->
+    <string name="delete_confirm_title">Изтриване</string>
+    <string name="delete_confirm_message">Изтриване на \"%s\"?</string>
+    <string name="delete">Изтрий</string>
+    <string name="cancel">Отказ</string>
+    <string name="delete_tag_title">Изтриване на таг \"%s\"?</string>
+    <string name="also_delete_events_with_tag">Изтрий и всички събития с този таг</string>
+
+    <!-- Messages -->
+    <string name="saved_successfully">Запазено успешно</string>
+    <string name="no_results_found">Няма резултати</string>
+
+    <!-- Errors -->
+    <string name="error_name_required">Името е задължително</string>
+    <string name="error_city_required">Градът е задължителен</string>
+    <string name="error_location_required">Моля потърсете и изберете местоположение</string>
+
+    <!-- Chart display settings -->
+    <string name="chart_display_settings">Настройки графика</string>
+    <string name="house_system">Домова система</string>
+    <string name="show_dignities">Достойнства</string>
+    <string name="show_part_of_fortune">Лот на съдбата</string>
+    <string name="show_aspect_grid">Аспектна таблица</string>
+    <string name="aspect_grid_title">Таблица с аспекти</string>
+    <string name="dignity_header">Дост.</string>
+
+    <!-- Settings -->
+    <string name="settings">Настройки</string>
+    <string name="aspect_settings">Изобразени аспекти на обекти</string>
+    <string name="aspect_settings_desc">Изберете кои тела да бъдат включени при изчисляването на аспектите</string>
+    <string name="include_chiron">Включи Хирон</string>
+    <string name="include_lilith">Включи Лилит (Черна Луна)</string>
+    <string name="include_rahu">Включи Северен възел (Раху)</string>
+    <string name="include_asc">Включи Асцендент (АСЦ)</string>
+    <string name="include_dsc">Включи Десцендент (ДЕС)</string>
+    <string name="include_mc">Включи МС (Среднонебесна точка)</string>
+    <string name="include_ic">Включи ИМУ (Имум Цели)</string>
+
+    <string name="hide_personal_transits">Скрий личните планети в транзитите</string>
+    <string name="hide_personal_transits_desc">Премахва Слънце, Луна, Меркурий, Венера, Марс от транзитния ред (остават в натален ред)</string>
+
+    <!-- Transit aspect detail -->
+    <string name="transit_aspect_detail">Детайл на аспект</string>
+    <string name="legend_natal_aspects">Натални аспекти на %1$s</string>
+    <string name="legend_transit_aspects">Транзитни аспекти на %1$s</string>
+    <string name="legend_cross_aspect">Транзит ↔ Натал — конкретен аспект</string>
+
+    <!-- Human Design -->
+    <string name="human_design">Хюман Дизайн</string>
+    <string name="human_design_tab">Дизайн</string>
+    <string name="hd_type_section">Тип</string>
+    <string name="hd_select_chart">Карта</string>
+    <string name="hd_no_charts">Първо създайте рождена карта.</string>
+    <string name="hd_personality">Личност</string>
+    <string name="hd_design">Дизайн</string>
+    <string name="hd_authority">Авторитет</string>
+    <string name="hd_profile">Профил</string>
+    <string name="hd_definition">Дефиниция</string>
+    <string name="hd_type_manifestor">Манифестор</string>
+    <string name="hd_type_generator">Генератор</string>
+    <string name="hd_type_mg">Манифестиращ Генератор</string>
+    <string name="hd_type_projector">Проектор</string>
+    <string name="hd_type_reflector">Рефлектор</string>
+    <string name="hd_strategy_manifestor">Стратегия: Информирай преди да действаш</string>
+    <string name="hd_strategy_generator">Стратегия: Изчакай и откликни</string>
+    <string name="hd_strategy_mg">Стратегия: Откликни, после информирай</string>
+    <string name="hd_strategy_projector">Стратегия: Изчакай поканата</string>
+    <string name="hd_strategy_reflector">Стратегия: Изчакай лунен цикъл (28 дни)</string>
+    <string name="hd_auth_emotional">Емоционален (Слънчев сплит)</string>
+    <string name="hd_auth_sacral">Сакрален</string>
+    <string name="hd_auth_splenic">Спленичен</string>
+    <string name="hd_auth_ego">Его (Сърце)</string>
+    <string name="hd_auth_self">Авторитет на Аза (G)</string>
+    <string name="hd_auth_mental">Ментален / Външен</string>
+    <string name="hd_auth_lunar">Лунарен (Рефлектор)</string>
+    <string name="hd_def_none">Без дефиниция</string>
+    <string name="hd_def_single">Единична дефиниция</string>
+    <string name="hd_def_split">Сплит дефиниция</string>
+    <string name="hd_def_triple">Троен сплит</string>
+    <string name="hd_def_quad">Четворен сплит</string>
+
+    <!-- Language settings -->
+    <string name="language_settings">Език</string>
+    <string name="language_bg">Български</string>
+    <string name="language_en">English</string>
+
+    <!-- Бургер меню -->
+    <string name="terms_and_conditions">Общи условия</string>
+    <string name="privacy_policy">Политика за поверителност</string>
+    <string name="gdpr_data_usage">GDPR и използване на данни</string>
+
+    <!-- Правни текстове: Общи условия -->
+    <string name="legal_terms_text">ОБЩИ УСЛОВИЯ\n\nПоследна актуализация: юни 2026\n\n1. ПРИЕМАНЕ НА УСЛОВИЯТА\nС използването на Астро Ключ вие приемате тези Общи условия. Ако не сте съгласни, моля деинсталирайте приложението.\n\n2. УПОТРЕБА НА ПРИЛОЖЕНИЕТО\nАстро Ключ е предназначено единствено за лична, нетърговска употреба. Не се допуска използване за незаконни цели.\n\n3. СЪХРАНЕНИЕ НА ДАННИ\nВсички данни, които въвеждате — натални карти, събития, бележки — се съхраняват локално на вашето устройство. Ние нямаме достъп до вашите лични данни и не ги предаваме на външни сървъри.\n\n4. ТОЧНОСТ НА АСТРОЛОГИЧЕСКИТЕ ДАННИ\nАстро Ключ използва библиотеката Swiss Ephemeris за планетарни изчисления, която осигурява изключително точни астрономически позиции. Астрологическите интерпретации са само за лично забавление и размисъл. Ние не правим никакви твърдения относно точността или валидността на астрологическите предсказания.\n\n5. ИНТЕЛЕКТУАЛНА СОБСТВЕНОСТ\nЦялото съдържание, дизайн и код в Астро Ключ са интелектуална собственост на разработчика. Не се допуска копиране, модифициране или разпространение на каквато и да е част от приложението.\n\n6. ОГРАНИЧЕНИЕ НА ОТГОВОРНОСТТА\nПриложението се предоставя „такова, каквото е" без гаранции от какъвто и да е вид. Разработчикът не носи отговорност за щети, произтичащи от употребата на приложението.\n\n7. ПРОМЕНИ В УСЛОВИЯТА\nЗапазваме правото да актуализираме тези Условия по всяко време. Продължаването на употребата на приложението след промените означава приемане на новите Условия.\n\n8. КОНТАКТ\nЗа въпроси: kastroguru@gmail.com</string>
+
+    <!-- Правни текстове: Политика за поверителност -->
+    <string name="legal_privacy_text">ПОЛИТИКА ЗА ПОВЕРИТЕЛНОСТ\n\nПоследна актуализация: юни 2026\n\n1. ОБЩО\nАстро Ключ е разработено с поверителността като основен принцип. Всички данни се съхраняват локално на вашето устройство и никога не се предават на външни сървъри.\n\n2. ДАННИ, КОИТО СЪХРАНЯВАМЕ\nПриложението съхранява само данните, които вие изрично въвеждате:\n- Имена и дати на раждане за астрологически карти\n- Географски местоположения, използвани за изчисления\n- Лични дневникови записи и бележки за събития\n- Настройки на приложението\n\n3. КАК ИЗПОЛЗВАМЕ ВАШИТЕ ДАННИ\nВашите данни се използват единствено за изчисляване и показване на астрологически карти и дневникови записи в рамките на приложението. Те никога не се използват за реклама, анализи или каквато и да е друга цел.\n\n4. СПОДЕЛЯНЕ НА ДАННИ\nНие не продаваме, споделяме или предаваме вашите данни на трети страни при никакви обстоятелства.\n\n5. СЪХРАНЕНИЕ НА ДАННИ\nВсички данни се съхраняват в локална SQLite база данни на вашето устройство. Функцията Auto Backup на Android може да синхронизира тази база данни с вашия акаунт в Google — това се контролира изцяло от настройките на вашето устройство и собствената политика за поверителност на Google.\n\n6. ВАШИТЕ ПРАВА\nМожете да преглеждате, редактирате или изтривате вашите данни по всяко време от приложението. Деинсталирането на приложението премахва всички локално съхранени данни.\n\n7. ПОВЕРИТЕЛНОСТ НА ДЕЦА\nТова приложение не е предназначено за деца под 13 години. Ние не събираме съзнателно данни от деца.\n\n8. КОНТАКТ\nЗа въпроси относно поверителността: kastroguru@gmail.com</string>
+
+    <!-- Правни текстове: GDPR -->
+    <string name="legal_gdpr_text">GDPR И ИЗПОЛЗВАНЕ НА ДАННИ\n\nПоследна актуализация: юни 2026\n\n1. АДМИНИСТРАТОР НА ДАННИ\nАдминистраторът на данни за Астро Ключ е:\nKastro Guru\nИмейл: kastroguru@gmail.com\n\n2. ПРАВНО ОСНОВАНИЕ ЗА ОБРАБОТКА\nВашите данни се обработват въз основа на вашето изрично съгласие, дадено когато ги въвеждате в приложението (Член 6(1)(а) GDPR).\n\n3. КАКВИ ДАННИ СЕ ОБРАБОТВАТ\n- Имена (могат да бъдат реални или измислени — по ваш избор)\n- Дати и часове на раждане\n- Географски местоположения (град, държава, координати)\n- Лични дневникови записи и бележки за събития\n\n4. ЦЕЛ НА ОБРАБОТКАТА\nДанните се обработват единствено за изчисляване и показване на астрологически карти за ваша лична употреба в приложението.\n\n5. СРОК НА СЪХРАНЕНИЕ\nВашите данни се съхраняват на устройството ви до тяхното изтриване. Можете да изтриете отделни записи или всички данни от приложението по всяко време.\n\n6. ВАШИТЕ ПРАВА ПО GDPR\nКато потребител в ЕС имате следните права:\n\n- Право на достъп: всички ваши данни са видими в приложението по всяко време.\n- Право на коригиране: можете да редактирате всеки запис по всяко време.\n- Право на изтриване (\"право да бъдеш забравен\"): можете да изтриете всеки или всички записи по всяко време.\n- Право на преносимост на данни: използвайте функцията за експорт, за да получите копие на данните си.\n- Право на възражение: можете да спрете да използвате приложението и да изтриете всички данни по всяко време.\n- Право на оттегляне на съгласие: деинсталирането на приложението е равносилно на оттегляне на съгласие.\n\n7. ТРАНСФЕР НА ДАННИ\nТова приложение не прехвърля вашите данни извън вашето устройство. Ако сте активирали Auto Backup на Android, данните могат да бъдат съхранени в акаунта ви в Google и подлежат на политиката за поверителност на Google.\n\n8. ЖАЛБИ\nАко смятате, че правата ви за защита на данните са нарушени, имате право да подадете жалба до националния орган за защита на данните.\n\n9. КОНТАКТ\nЗа GDPR запитвания: kastroguru@gmail.com</string>
+
+    <!-- Импорт от Astro.com -->
+    <string name="import_section_title">Импорт на данни</string>
+    <string name="import_section_desc">Импортиране на запазени карти от astro.com</string>
+    <string name="import_astrocom_btn">Импорт от Astro.com</string>
+    <string name="import_astrocom_title">Импорт от Astro.com</string>
+    <string name="import_instructions">1. Влезте в профила си на astro.com и отворете My Astro → Stored Astro Data.\n\n2. Натиснете бутона AAF, за да превключите списъка към AAF формат за експорт.\n\n3. Изберете и копирайте всички редове, започващи с #A93: (може да маркирате и копирате цялата страница).\n\n4. Поставете копирания текст в полето по-долу и натиснете Импортирай.</string>
+    <string name="import_paste_hint">Поставете AAF данните тук…</string>
+    <string name="import_btn">Импортирай</string>
+    <string name="import_no_data">Не са намерени валидни AAF записи. Уверете се, че поставяте редове, започващи с #A93:</string>
+    <string name="import_progress">Импортиране на %1$d от %2$d…</string>
+    <string name="import_success">Успешно импортирани %1$d карти</string>
+    <string name="import_partial">Импортирани %1$d карти, %2$d неуспешни</string>
+
+    <!-- Имена на планети -->
+    <string name="planet_sun">Слънце</string>
+    <string name="planet_moon">Луна</string>
+    <string name="planet_mercury">Меркурий</string>
+    <string name="planet_venus">Венера</string>
+    <string name="planet_mars">Марс</string>
+    <string name="planet_jupiter">Юпитер</string>
+    <string name="planet_saturn">Сатурн</string>
+    <string name="planet_uranus">Уран</string>
+    <string name="planet_neptune">Нептун</string>
+    <string name="planet_pluto">Плутон</string>
+    <string name="planet_chiron">Хирон</string>
+    <string name="planet_rahu">Раху</string>
+    <string name="planet_lilith">Лилит</string>
+    <string name="part_of_fortune">Лот на съдбата</string>
+
+    <!-- Имена на зодиакални знаци -->
+    <string name="sign_aries">Овен</string>
+    <string name="sign_taurus">Телец</string>
+    <string name="sign_gemini">Близнаци</string>
+    <string name="sign_cancer">Рак</string>
+    <string name="sign_leo">Лъв</string>
+    <string name="sign_virgo">Дева</string>
+    <string name="sign_libra">Везни</string>
+    <string name="sign_scorpio">Скорпион</string>
+    <string name="sign_sagittarius">Стрелец</string>
+    <string name="sign_capricorn">Козирог</string>
+    <string name="sign_aquarius">Водолей</string>
+    <string name="sign_pisces">Риби</string>
+</resources>

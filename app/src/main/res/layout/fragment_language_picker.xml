@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0D1A">
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Astro Key / Астро Ключ"
+        android:textColor="#8E8CEB"
+        android:textSize="30sp"
+        android:fontFamily="serif"
+        android:letterSpacing="0.05"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="80dp" />
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose language / Избери език"
+        android:textColor="#6D7691"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/tvAppName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp" />
+
+    <!-- BG Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardBg"
+        android:layout_width="148dp"
+        android:layout_height="196dp"
+        android:layout_marginEnd="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="#1A1A2E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        app:strokeColor="#FFD700"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cardEn"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="40dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/bgStarTopRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="8sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:id="@+id/bgStarAboveMoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="7sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:id="@+id/bgMoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="☽"
+                android:textColor="#FFD700"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@id/bgStarAboveMoon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="2dp" />
+
+            <FrameLayout
+                android:id="@+id/bgFlagCircle"
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:background="@drawable/bg_flag_circle"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/bgLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🇧🇬"
+                    android:textSize="42sp"
+                    android:layout_gravity="center" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/bgStarLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
+                app:layout_constraintTop_toTopOf="@id/bgFlagCircle"
+                app:layout_constraintBottom_toBottomOf="@id/bgFlagCircle"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="6dp" />
+
+            <TextView
+                android:id="@+id/bgStarRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
+                app:layout_constraintTop_toTopOf="@id/bgFlagCircle"
+                app:layout_constraintBottom_toBottomOf="@id/bgFlagCircle"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/bgStarAboveLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="7sp"
+                app:layout_constraintBottom_toTopOf="@id/bgLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/bgLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BG"
+                android:textColor="#FFD700"
+                android:textSize="17sp"
+                android:fontFamily="serif"
+                android:letterSpacing="0.1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="16dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- EN Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardEn"
+        android:layout_width="148dp"
+        android:layout_height="196dp"
+        android:layout_marginStart="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="#1A1A2E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        app:strokeColor="#FFD700"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cardBg"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="40dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/enStarTopRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="8sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:id="@+id/enStarAboveMoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="7sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:id="@+id/enMoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="☽"
+                android:textColor="#FFD700"
+                android:textSize="18sp"
+                app:layout_constraintTop_toBottomOf="@id/enStarAboveMoon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="2dp" />
+
+            <FrameLayout
+                android:id="@+id/enFlagCircle"
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:background="@drawable/bg_flag_circle"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/enLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🇬🇧"
+                    android:textSize="42sp"
+                    android:layout_gravity="center" />
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/enStarLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
+                app:layout_constraintTop_toTopOf="@id/enFlagCircle"
+                app:layout_constraintBottom_toBottomOf="@id/enFlagCircle"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="6dp" />
+
+            <TextView
+                android:id="@+id/enStarRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
+                app:layout_constraintTop_toTopOf="@id/enFlagCircle"
+                app:layout_constraintBottom_toBottomOf="@id/enFlagCircle"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/enStarAboveLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✦"
+                android:textColor="#FFD700"
+                android:textSize="7sp"
+                app:layout_constraintBottom_toTopOf="@id/enLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/enLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EN"
+                android:textColor="#FFD700"
+                android:textSize="17sp"
+                android:fontFamily="serif"
+                android:letterSpacing="0.1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="16dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

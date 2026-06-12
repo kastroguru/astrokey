@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Stacked centers = bodygraph -->
+    <!-- Head triangle -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:fillColor="#00000000"
+        android:pathData="M12,2 L14.5,6 L9.5,6 Z" />
+    <!-- Throat square -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:fillColor="#00000000"
+        android:pathData="M10,8 H14 V12 H10 Z" />
+    <!-- G diamond -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:fillColor="#00000000"
+        android:pathData="M12,13 L15,16 L12,19 L9,16 Z" />
+    <!-- Connectors -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:fillColor="#00000000"
+        android:pathData="M12,6 L12,8 M12,12 L12,13" />
+</vector>

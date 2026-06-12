@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/birthDataListFragment"
+        android:icon="@drawable/ic_natal"
+        android:title="@string/birth_data" />
+
+    <item
+        android:id="@+id/eventListFragment"
+        android:icon="@drawable/ic_diary"
+        android:title="@string/history_events" />
+
+    <item
+        android:id="@+id/nowFragment"
+        android:icon="@drawable/ic_now"
+        android:title="@string/now" />
+
+    <item
+        android:id="@+id/transitFragment"
+        android:icon="@drawable/ic_transit"
+        android:title="@string/transits" />
+
+    <item
+        android:id="@+id/humanDesignFragment"
+        android:icon="@drawable/ic_human_design"
+        android:title="@string/human_design_tab" />
+
+</menu>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- === AstroDiary Light Palette === -->
+
+    <!-- Backgrounds -->
+    <color name="background_dark">#F5F7FB</color>    <!-- Moon Mist -->
+    <color name="surface_dark">#E8E6F5</color>       <!-- Cloud Lavender -->
+    <color name="surface_variant">#ECEFF6</color>    <!-- Soft Pearl -->
+    <color name="surface_highlight">#DDEBFA</color>  <!-- Pale Sky -->
+
+    <!-- Text -->
+    <color name="text_primary">#3A4258</color>
+    <color name="text_secondary">#6D7691</color>
+    <color name="text_muted">#98A0BA</color>
+
+    <!-- Accents -->
+    <color name="gold">#8E8CEB</color>               <!-- Dusty Lavender – main accent -->
+    <color name="accent_purple">#C98DA0</color>      <!-- Rose Smoke -->
+    <color name="accent_blue">#8BCFD0</color>        <!-- Seafoam Teal -->
+    <color name="accent_teal">#A8C7B5</color>        <!-- Sage Mist -->
+    <color name="accent_warm">#F2DFC8</color>        <!-- Champagne Cream -->
+
+    <!-- UI structure -->
+    <color name="divider">#D8DDED</color>
+    <color name="card_stroke">#D8DDED</color>
+
+    <!-- Zodiac elements – adjusted for light background -->
+    <color name="element_fire">#D94F4F</color>
+    <color name="element_earth">#5A9A6A</color>
+    <color name="element_air">#4A8EC2</color>
+    <color name="element_water">#7B6FC9</color>
+
+    <!-- Material theme tokens (Light) -->
+    <color name="md_theme_dark_primary">#8E8CEB</color>
+    <color name="md_theme_dark_onPrimary">#FFFFFF</color>
+    <color name="md_theme_dark_primaryContainer">#E8E6F5</color>
+    <color name="md_theme_dark_onPrimaryContainer">#3A4258</color>
+    <color name="md_theme_dark_secondary">#A8C7B5</color>
+    <color name="md_theme_dark_onSecondary">#FFFFFF</color>
+    <color name="md_theme_dark_secondaryContainer">#DDEBFA</color>
+    <color name="md_theme_dark_onSecondaryContainer">#3A4258</color>
+    <color name="md_theme_dark_tertiary">#8BCFD0</color>
+    <color name="md_theme_dark_onTertiary">#FFFFFF</color>
+    <color name="md_theme_dark_tertiaryContainer">#D9F0F2</color>
+    <color name="md_theme_dark_onTertiaryContainer">#3A4258</color>
+    <color name="md_theme_dark_error">#B3261E</color>
+    <color name="md_theme_dark_onError">#FFFFFF</color>
+    <color name="md_theme_dark_errorContainer">#F9DEDC</color>
+    <color name="md_theme_dark_onErrorContainer">#410E0B</color>
+    <color name="md_theme_dark_background">#F5F7FB</color>
+    <color name="md_theme_dark_onBackground">#3A4258</color>
+    <color name="md_theme_dark_surface">#E8E6F5</color>
+    <color name="md_theme_dark_onSurface">#3A4258</color>
+    <color name="md_theme_dark_surfaceVariant">#ECEFF6</color>
+    <color name="md_theme_dark_onSurfaceVariant">#6D7691</color>
+    <color name="md_theme_dark_outline">#D8DDED</color>
+    <color name="md_theme_dark_inverseOnSurface">#F5F7FB</color>
+    <color name="md_theme_dark_inverseSurface">#3A4258</color>
+    <color name="md_theme_dark_inversePrimary">#C9C8F8</color>
+    <color name="md_theme_dark_surfaceTint">#8E8CEB</color>
+</resources>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Natal selector card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardBackgroundColor="@color/surface_dark"
+                app:strokeColor="@color/card_stroke"
+                app:strokeWidth="1dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/natal_chart"
+                        android:textColor="@color/gold"
+                        android:textSize="12sp"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.1"
+                        android:layout_marginBottom="6dp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerNatal"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@color/surface_variant"
+                        android:textColor="@color/text_primary"
+                        android:padding="8dp" />
+
+                    <TextView
+                        android:id="@+id/tvNatalInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:layout_marginTop="6dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Transit controls (NO card — full width chart) ── -->
+
+            <!-- Method selector (Transits / Primary directions) + refresh-now button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <Spinner
+                    android:id="@+id/spinnerMethod"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:background="@color/surface_variant"
+                    android:layout_marginEnd="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRefresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/refresh_now"
+                    android:textSize="12sp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/gold" />
+
+            </LinearLayout>
+
+            <!-- Current transit date display -->
+            <TextView
+                android:id="@+id/tvTransitDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/gold"
+                android:textSize="13sp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Navigation row: ← chips → -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="◀"
+                    android:textSize="18sp"
+                    android:padding="0dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/card_stroke" />
+
+                <HorizontalScrollView
+                    android:id="@+id/chipScrollView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:scrollbars="none"
+                    android:layout_marginHorizontal="4dp">
+
+                    <LinearLayout
+                        android:id="@+id/chipGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="2dp" />
+
+                </HorizontalScrollView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnForward"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="▶"
+                    android:textSize="18sp"
+                    android:padding="0dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    app:strokeColor="@color/card_stroke" />
+
+            </LinearLayout>
+
+            <!-- Chart — full width, no card padding -->
+            <eu.kastroguru.astrodiary.ui.chart.AspectsChartView
+                android:id="@+id/aspectsChart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!-- Primary-directions biwheel (separate chart; shown only in PD mode) -->
+            <eu.kastroguru.astrodiary.ui.chart.PrimaryDirectionsWheelView
+                android:id="@+id/pdWheel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvTransitSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:layout_marginTop="4dp"
+                android:singleLine="false" />
+
+            <!-- Aspect list card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/surface_dark"
+                app:strokeColor="@color/card_stroke"
+                app:strokeWidth="1dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="6dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/active_aspects"
+                            android:textColor="@color/gold"
+                            android:textSize="12sp"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tap_for_details"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvAspects"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:divider="@null" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Loading spinner OVERLAYS the content (centered), so toggling it never reflows the
+         scroll content and the chart no longer jumps when stepping dates / refreshing. -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

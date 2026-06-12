@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Astro Key</string>
+    <string name="widget_description">Shows current planetary positions on your home screen</string>
+
+    <!-- Navigation -->
+    <string name="birth_data">Birth Data</string>
+    <string name="history_events">Events</string>
+    <string name="now">Now</string>
+    <string name="transits">Transits</string>
+
+    <!-- Birth Data -->
+    <string name="add_birth_data">Add Birth Data</string>
+    <string name="birth_data_detail">Birth Data Detail</string>
+    <string name="no_birth_data">No birth data yet. Tap + to add.</string>
+    <string name="natal_chart">Natal Chart</string>
+    <string name="planet_positions">Planet Positions</string>
+    <string name="house_cusps">House Cusps</string>
+    <string name="view_chart">View Chart</string>
+    <string name="view_table">Planet Table</string>
+    <string name="edit_birth_data">Edit</string>
+    <string name="recalculate_update">Recalculate &amp; Update</string>
+
+    <!-- Events -->
+    <string name="add_event">Add Event</string>
+    <string name="event_detail">Event Detail</string>
+    <string name="no_events">No events yet. Tap + to add.</string>
+    <string name="event_name">Event Name</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
+    <string name="tags_hint">Tags (comma-separated)</string>
+    <string name="global_event_label">Global event</string>
+    <string name="global_event">Global event</string>
+    <string name="personal_event">Personal event</string>
+    <string name="no_description">No description</string>
+    <string name="no_tags">No tags</string>
+
+    <!-- Form -->
+    <string name="name">Name</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
+    <string name="city">City</string>
+    <string name="country">Country (optional)</string>
+    <string name="timezone">Timezone</string>
+    <string name="search_city">Search City</string>
+    <string name="select_location">Select Location</string>
+    <string name="calculate_and_save">Calculate &amp; Save</string>
+    <string name="location_selected" formatted="false">Location: %.4f, %.4f</string>
+    <string name="timezone_select_first">Timezone: select a location first</string>
+    <string name="timezone_detected">Timezone: %1$s</string>
+    <string name="timezone_auto">Timezone: %1$s (auto-detected)</string>
+    <string name="timezone_not_detected">Timezone could not be detected — please re-select the location.</string>
+    <string name="enter_city_name">Enter a city name</string>
+
+    <!-- Now -->
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="set_location">Set Location</string>
+    <string name="refresh">Refresh</string>
+
+    <!-- Table -->
+    <string name="planet">Planet</string>
+    <string name="sign">Sign</string>
+    <string name="degree">Degree</string>
+    <string name="house">H</string>
+    <string name="all">All</string>
+
+    <string name="tap_for_details">↗ tap for details</string>
+
+    <!-- Transit chart -->
+    <string name="house_row_label">House</string>
+    <string name="active_aspects">Active Aspects</string>
+    <string name="refresh_now">↻ Now</string>
+    <string name="now_live_label"> (now)</string>
+    <string name="pd_method_transits">Transits</string>
+    <string name="pd_method_directions">Primary directions</string>
+    <string name="legend_directed_aspects">Directed aspects of %1$s</string>
+    <string name="source_code">Source code (AGPL-3.0)</string>
+
+    <!-- Aspect names -->
+    <string name="aspect_conjunction">Conjunction</string>
+    <string name="aspect_sextile">Sextile</string>
+    <string name="aspect_square">Square</string>
+    <string name="aspect_trine">Trine</string>
+    <string name="aspect_quincunx">Quincunx</string>
+    <string name="aspect_opposition">Opposition</string>
+    <string name="orb_format">orb %1$s°</string>
+    <string name="applying">▶ applying</string>
+    <string name="separating">◀ separating</string>
+
+    <!-- Dialogs -->
+    <string name="delete_confirm_title">Delete</string>
+    <string name="delete_confirm_message">Delete \"%s\"?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_tag_title">Delete tag \"%s\"?</string>
+    <string name="also_delete_events_with_tag">Also delete all events with this tag</string>
+
+    <!-- Messages -->
+    <string name="saved_successfully">Saved successfully</string>
+    <string name="no_results_found">No results found</string>
+
+    <!-- Errors -->
+    <string name="error_name_required">Name is required</string>
+    <string name="error_city_required">City is required</string>
+    <string name="error_location_required">Please search and select a location first</string>
+
+    <!-- Chart display settings -->
+    <string name="chart_display_settings">Chart Display</string>
+    <string name="house_system">House System</string>
+    <string name="show_dignities">Essential Dignities</string>
+    <string name="show_part_of_fortune">Part of Fortune</string>
+    <string name="show_aspect_grid">Aspect Grid</string>
+    <string name="aspect_grid_title">Aspect Grid</string>
+    <string name="dignity_header">Dg</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="aspect_settings">Aspect Bodies</string>
+    <string name="aspect_settings_desc">Choose which bodies to include when calculating aspects</string>
+    <string name="include_chiron">Include Chiron</string>
+    <string name="include_lilith">Include Lilith (Black Moon)</string>
+    <string name="include_rahu">Include North Node (Rahu)</string>
+    <string name="include_asc">Include Ascendant (ASC)</string>
+    <string name="include_dsc">Include Descendant (DSC)</string>
+    <string name="include_mc">Include Midheaven (MC)</string>
+    <string name="include_ic">Include Imum Coeli (IC)</string>
+
+    <string name="hide_personal_transits">Hide personal planets in transits</string>
+    <string name="hide_personal_transits_desc">Removes Sun, Moon, Mercury, Venus, Mars from the transit row (they remain in the natal row)</string>
+
+    <!-- Transit aspect detail -->
+    <string name="transit_aspect_detail">Aspect Detail</string>
+    <string name="legend_natal_aspects">%1$s natal chart aspects</string>
+    <string name="legend_transit_aspects">%1$s transit aspects</string>
+    <string name="legend_cross_aspect">Transit ↔ Natal cross-aspect</string>
+
+    <!-- Human Design -->
+    <string name="human_design">Human Design</string>
+    <string name="human_design_tab">Design</string>
+    <string name="hd_type_section">Type</string>
+    <string name="hd_select_chart">Chart</string>
+    <string name="hd_no_charts">Create a birth chart first.</string>
+    <string name="hd_personality">Personality</string>
+    <string name="hd_design">Design</string>
+    <string name="hd_authority">Authority</string>
+    <string name="hd_profile">Profile</string>
+    <string name="hd_definition">Definition</string>
+    <string name="hd_type_manifestor">Manifestor</string>
+    <string name="hd_type_generator">Generator</string>
+    <string name="hd_type_mg">Manifesting Generator</string>
+    <string name="hd_type_projector">Projector</string>
+    <string name="hd_type_reflector">Reflector</string>
+    <string name="hd_strategy_manifestor">Strategy: Inform before acting</string>
+    <string name="hd_strategy_generator">Strategy: Wait to respond</string>
+    <string name="hd_strategy_mg">Strategy: Respond, then inform</string>
+    <string name="hd_strategy_projector">Strategy: Wait for the invitation</string>
+    <string name="hd_strategy_reflector">Strategy: Wait a lunar cycle (28 days)</string>
+    <string name="hd_auth_emotional">Emotional (Solar Plexus)</string>
+    <string name="hd_auth_sacral">Sacral</string>
+    <string name="hd_auth_splenic">Splenic</string>
+    <string name="hd_auth_ego">Ego (Heart)</string>
+    <string name="hd_auth_self">Self-Projected (G)</string>
+    <string name="hd_auth_mental">Mental / Environmental</string>
+    <string name="hd_auth_lunar">Lunar (Reflector)</string>
+    <string name="hd_def_none">No Definition</string>
+    <string name="hd_def_single">Single Definition</string>
+    <string name="hd_def_split">Split Definition</string>
+    <string name="hd_def_triple">Triple Split</string>
+    <string name="hd_def_quad">Quadruple Split</string>
+
+    <!-- Language settings -->
+    <string name="language_settings">Language</string>
+    <string name="language_bg">Български</string>
+    <string name="language_en">English</string>
+
+    <!-- Burger menu labels -->
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="gdpr_data_usage">GDPR &amp; Data Usage</string>
+
+    <!-- Legal: Terms & Conditions -->
+    <string name="legal_terms_text">TERMS &amp; CONDITIONS\n\nLast updated: June 2026\n\n1. ACCEPTANCE OF TERMS\nBy using Astro Key you agree to these Terms and Conditions. If you do not agree, please uninstall the app.\n\n2. USE OF THE APP\nAstro Key is provided for personal, non-commercial use only. You may not use the app for any unlawful purpose.\n\n3. DATA STORAGE\nAll data you enter — birth charts, events, notes — is stored locally on your device. We do not collect, access, or transmit your personal data to any external server.\n\n4. ACCURACY OF ASTROLOGICAL DATA\nAstro Key uses the Swiss Ephemeris library for planetary calculations, which provides highly accurate astronomical positions. Astrological interpretations are for personal reflection and entertainment purposes only. We make no claims regarding the accuracy or validity of astrological predictions.\n\n5. INTELLECTUAL PROPERTY\nAll content, design, and code in Astro Key is the intellectual property of the developer. You may not copy, modify, or redistribute any part of the application.\n\n6. LIMITATION OF LIABILITY\nThe app is provided \"as is\" without warranty of any kind. The developer is not liable for any damages arising from your use of the app.\n\n7. CHANGES TO TERMS\nWe reserve the right to update these Terms at any time. Continued use of the app after changes constitutes acceptance of the new Terms.\n\n8. CONTACT\nFor questions: kastroguru@gmail.com</string>
+
+    <!-- Legal: Privacy Policy -->
+    <string name="legal_privacy_text">PRIVACY POLICY\n\nLast updated: June 2026\n\n1. OVERVIEW\nAstro Key is designed with privacy as a core principle. All data is stored locally on your device and never transmitted to external servers.\n\n2. DATA WE STORE\nThe app stores only data you explicitly enter:\n- Names and birth dates for astrological charts\n- Geographic locations used for chart calculations\n- Personal diary entries and event notes\n- App settings and preferences\n\n3. HOW WE USE YOUR DATA\nYour data is used solely to calculate and display astrological charts and diary entries within the app. It is never used for advertising, analytics, or any other purpose.\n\n4. DATA SHARING\nWe do not sell, share, or transmit your data to any third party under any circumstances.\n\n5. DATA STORAGE\nAll data is stored in a local SQLite database on your device. Android\'s Auto Backup feature may sync this database to your Google account — this is controlled entirely by your Android device settings and Google\'s own privacy policy.\n\n6. YOUR RIGHTS\nYou can view, edit, or delete any of your data at any time from within the app. Uninstalling the app removes all locally stored data.\n\n7. CHILDREN\'S PRIVACY\nThis app is not directed at children under 13. We do not knowingly collect data from children.\n\n8. CONTACT\nFor privacy questions: kastroguru@gmail.com</string>
+
+    <!-- Legal: GDPR -->
+    <string name="legal_gdpr_text">GDPR &amp; DATA USAGE\n\nLast updated: June 2026\n\n1. DATA CONTROLLER\nThe data controller for Astro Key is:\nKastro Guru\nEmail: kastroguru@gmail.com\n\n2. LEGAL BASIS FOR PROCESSING\nYour data is processed on the basis of your explicit consent, given when you enter it into the app (Article 6(1)(a) GDPR).\n\n3. WHAT DATA IS PROCESSED\n- Names (may be real or fictional — your choice)\n- Birth dates and times\n- Geographic locations (city, country, coordinates)\n- Personal diary entries and event notes\n\n4. PURPOSE OF PROCESSING\nData is processed solely to calculate and display astrological charts for your personal use within the app.\n\n5. DATA RETENTION\nYour data is retained on your device until you delete it. You can delete individual entries or all data from within the app at any time.\n\n6. YOUR GDPR RIGHTS\nAs a user in the EU you have the following rights:\n\n- Right of access: all your data is always visible within the app.\n- Right to rectification: you can edit any entry at any time.\n- Right to erasure (\"right to be forgotten\"): you can delete any or all entries at any time.\n- Right to data portability: use the export feature to obtain a copy of your data.\n- Right to object: you may stop using the app and delete all data at any time.\n- Right to withdraw consent: uninstalling the app constitutes withdrawal of consent.\n\n7. DATA TRANSFERS\nThis app does not transfer your data outside your device. If you have enabled Android Auto Backup, data may be stored in your Google account and is subject to Google\'s own privacy policy.\n\n8. COMPLAINTS\nIf you believe your data protection rights have been violated, you have the right to lodge a complaint with your national data protection authority.\n\n9. CONTACT\nFor GDPR requests: kastroguru@gmail.com</string>
+
+    <!-- Import from Astro.com -->
+    <string name="import_section_title">Import Data</string>
+    <string name="import_section_desc">Import saved birth charts from astro.com</string>
+    <string name="import_astrocom_btn">Import from Astro.com</string>
+    <string name="import_astrocom_title">Import from Astro.com</string>
+    <string name="import_instructions">1. Log in to astro.com and go to My Astro → Stored Astro Data.\n\n2. Click the AAF button to switch the list to AAF export format.\n\n3. Select and copy all lines beginning with #A93: (you can select and copy the entire page).\n\n4. Paste the copied text into the field below and tap Import.</string>
+    <string name="import_paste_hint">Paste AAF data here…</string>
+    <string name="import_btn">Import</string>
+    <string name="import_no_data">No valid AAF records found. Make sure to paste lines that start with #A93:</string>
+    <string name="import_progress">Importing %1$d of %2$d…</string>
+    <string name="import_success">Successfully imported %1$d chart(s)</string>
+    <string name="import_partial">Imported %1$d chart(s), %2$d failed</string>
+
+    <!-- Planet names -->
+    <string name="planet_sun">Sun</string>
+    <string name="planet_moon">Moon</string>
+    <string name="planet_mercury">Mercury</string>
+    <string name="planet_venus">Venus</string>
+    <string name="planet_mars">Mars</string>
+    <string name="planet_jupiter">Jupiter</string>
+    <string name="planet_saturn">Saturn</string>
+    <string name="planet_uranus">Uranus</string>
+    <string name="planet_neptune">Neptune</string>
+    <string name="planet_pluto">Pluto</string>
+    <string name="planet_chiron">Chiron</string>
+    <string name="planet_rahu">Rahu</string>
+    <string name="planet_lilith">Lilith</string>
+    <string name="part_of_fortune">Part of Fortune</string>
+
+    <!-- Zodiac sign names -->
+    <string name="sign_aries">Aries</string>
+    <string name="sign_taurus">Taurus</string>
+    <string name="sign_gemini">Gemini</string>
+    <string name="sign_cancer">Cancer</string>
+    <string name="sign_leo">Leo</string>
+    <string name="sign_virgo">Virgo</string>
+    <string name="sign_libra">Libra</string>
+    <string name="sign_scorpio">Scorpio</string>
+    <string name="sign_sagittarius">Sagittarius</string>
+    <string name="sign_capricorn">Capricorn</string>
+    <string name="sign_aquarius">Aquarius</string>
+    <string name="sign_pisces">Pisces</string>
+</resources>

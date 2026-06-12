@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="12dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="☽ Planets Now"
+            android:textColor="#FFD700"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#99AAAACC"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+
+    <!-- Planet grid: 2 rows × 4 cols -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView android:id="@+id/widget_sun"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#FFD700" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_moon"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#BBDDFF" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_mercury"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#CCCCCC" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_venus"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#FF9EAD" android:textSize="12sp" android:gravity="center" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <TextView android:id="@+id/widget_mars"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#E53935" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_jupiter"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#FF9800" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_saturn"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#9090A0" android:textSize="12sp" android:gravity="center" />
+
+        <TextView android:id="@+id/widget_asc"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:textColor="#4CAF50" android:textSize="12sp" android:gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:minHeight="44dp"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="4dp">
+
+    <TextView
+        android:id="@+id/textGlyph"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/gold"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/textPlanetName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textSign"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textDignity"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/textDegree"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:fontFamily="monospace"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/textHouse"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/accent_purple"
+        android:textSize="14sp" />
+
+</LinearLayout>

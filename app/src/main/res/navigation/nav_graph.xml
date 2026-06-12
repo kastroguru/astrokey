@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/birthDataListFragment">
+
+    <!-- Language picker (first-run only) -->
+    <fragment
+        android:id="@+id/languagePickerFragment"
+        android:name="eu.kastroguru.astrodiary.ui.onboarding.LanguagePickerFragment"
+        android:label=""
+        tools:layout="@layout/fragment_language_picker">
+
+        <action
+            android:id="@+id/action_languagePickerFragment_to_birthDataListFragment"
+            app:destination="@id/birthDataListFragment"
+            app:popUpTo="@id/languagePickerFragment"
+            app:popUpToInclusive="true" />
+
+    </fragment>
+
+    <!-- Birth Data flow -->
+    <fragment
+        android:id="@+id/birthDataListFragment"
+        android:name="eu.kastroguru.astrodiary.ui.birthdata.BirthDataListFragment"
+        android:label="@string/birth_data"
+        tools:layout="@layout/fragment_birth_data_list">
+
+        <action
+            android:id="@+id/action_birthDataListFragment_to_birthDataFormFragment"
+            app:destination="@id/birthDataFormFragment" />
+
+        <action
+            android:id="@+id/action_birthDataListFragment_to_birthDataDetailFragment"
+            app:destination="@id/birthDataDetailFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/birthDataFormFragment"
+        android:name="eu.kastroguru.astrodiary.ui.birthdata.BirthDataFormFragment"
+        android:label="@string/add_birth_data"
+        tools:layout="@layout/fragment_birth_data_form">
+
+        <!-- 0 = create new; >0 = edit existing entry with that ID -->
+        <argument
+            android:name="birthDataId"
+            app:argType="long"
+            android:defaultValue="0L" />
+
+        <action
+            android:id="@+id/action_birthDataFormFragment_to_chartFragment"
+            app:destination="@id/chartFragment"
+            app:popUpTo="@id/birthDataListFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/birthDataDetailFragment"
+        android:name="eu.kastroguru.astrodiary.ui.birthdata.BirthDataDetailFragment"
+        android:label="@string/birth_data_detail"
+        tools:layout="@layout/fragment_birth_data_detail">
+
+        <argument
+            android:name="birthDataId"
+            app:argType="long" />
+
+        <action
+            android:id="@+id/action_birthDataDetailFragment_to_birthDataFormFragment"
+            app:destination="@id/birthDataFormFragment" />
+
+        <action
+            android:id="@+id/action_birthDataDetailFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+
+        <action
+            android:id="@+id/action_birthDataDetailFragment_to_planetTableFragment"
+            app:destination="@id/planetTableFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/chartFragment"
+        android:name="eu.kastroguru.astrodiary.ui.chart.ChartFragment"
+        android:label="@string/natal_chart"
+        tools:layout="@layout/fragment_chart">
+
+        <argument
+            android:name="birthDataId"
+            app:argType="long" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/planetTableFragment"
+        android:name="eu.kastroguru.astrodiary.ui.chart.PlanetTableFragment"
+        android:label="@string/planet_positions"
+        tools:layout="@layout/fragment_planet_table">
+
+        <argument
+            android:name="birthDataId"
+            app:argType="long" />
+
+    </fragment>
+
+    <!-- History Events flow -->
+    <fragment
+        android:id="@+id/eventListFragment"
+        android:name="eu.kastroguru.astrodiary.ui.events.EventListFragment"
+        android:label="@string/history_events"
+        tools:layout="@layout/fragment_event_list">
+
+        <action
+            android:id="@+id/action_eventListFragment_to_eventFormFragment"
+            app:destination="@id/eventFormFragment" />
+
+        <action
+            android:id="@+id/action_eventListFragment_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/eventFormFragment"
+        android:name="eu.kastroguru.astrodiary.ui.events.EventFormFragment"
+        android:label="@string/add_event"
+        tools:layout="@layout/fragment_event_form">
+
+        <!-- 0 = create new; >0 = edit existing -->
+        <argument
+            android:name="eventId"
+            app:argType="long"
+            android:defaultValue="0L" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/eventDetailFragment"
+        android:name="eu.kastroguru.astrodiary.ui.events.EventDetailFragment"
+        android:label="@string/event_detail"
+        tools:layout="@layout/fragment_event_detail">
+
+        <argument
+            android:name="eventId"
+            app:argType="long" />
+
+        <action
+            android:id="@+id/action_eventDetailFragment_to_eventFormFragment"
+            app:destination="@id/eventFormFragment" />
+
+        <action
+            android:id="@+id/action_eventDetailFragment_to_eventChartFragment"
+            app:destination="@id/eventChartFragment" />
+
+        <action
+            android:id="@+id/action_eventDetailFragment_to_eventPlanetTableFragment"
+            app:destination="@id/eventPlanetTableFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/eventChartFragment"
+        android:name="eu.kastroguru.astrodiary.ui.events.EventChartFragment"
+        android:label="@string/natal_chart"
+        tools:layout="@layout/fragment_chart">
+
+        <argument
+            android:name="eventId"
+            app:argType="long" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/eventPlanetTableFragment"
+        android:name="eu.kastroguru.astrodiary.ui.events.EventPlanetTableFragment"
+        android:label="@string/planet_positions"
+        tools:layout="@layout/fragment_planet_table">
+
+        <argument
+            android:name="eventId"
+            app:argType="long" />
+
+    </fragment>
+
+    <!-- Now -->
+    <fragment
+        android:id="@+id/nowFragment"
+        android:name="eu.kastroguru.astrodiary.ui.now.NowFragment"
+        android:label="@string/now"
+        tools:layout="@layout/fragment_now" />
+
+    <!-- Transits -->
+    <fragment
+        android:id="@+id/transitFragment"
+        android:name="eu.kastroguru.astrodiary.ui.transit.TransitFragment"
+        android:label="@string/transits"
+        tools:layout="@layout/fragment_transit">
+        <action
+            android:id="@+id/action_transitFragment_to_aspectDetail"
+            app:destination="@id/transitAspectDetailFragment" />
+    </fragment>
+
+    <!-- Transit aspect detail -->
+    <fragment
+        android:id="@+id/transitAspectDetailFragment"
+        android:name="eu.kastroguru.astrodiary.ui.transit.TransitAspectDetailFragment"
+        android:label="@string/transit_aspect_detail"
+        tools:layout="@layout/fragment_transit_aspect_detail">
+        <argument android:name="natalPlanetKey"   app:argType="string" android:defaultValue="sun" />
+        <argument android:name="transitPlanetKey" app:argType="string" android:defaultValue="sun" />
+        <argument android:name="natalDataId"      app:argType="long"   android:defaultValue="0L" />
+        <argument android:name="transitMs"        app:argType="long"   android:defaultValue="0L" />
+        <argument android:name="isPd"             app:argType="boolean" android:defaultValue="false" />
+        <argument android:name="directedLon"      app:argType="float"  android:defaultValue="-1.0" />
+    </fragment>
+
+    <!-- Human Design -->
+    <fragment
+        android:id="@+id/humanDesignFragment"
+        android:name="eu.kastroguru.astrodiary.ui.humandesign.HumanDesignFragment"
+        android:label="@string/human_design"
+        tools:layout="@layout/fragment_human_design" />
+
+    <!-- Settings -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="eu.kastroguru.astrodiary.ui.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <!-- Legal screens -->
+    <fragment
+        android:id="@+id/legalFragment"
+        android:name="eu.kastroguru.astrodiary.ui.legal.LegalFragment"
+        android:label=""
+        tools:layout="@layout/fragment_legal">
+
+        <argument
+            android:name="legalType"
+            app:argType="string"
+            android:defaultValue="terms" />
+
+    </fragment>
+
+</navigation>
