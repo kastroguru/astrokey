@@ -76,6 +76,22 @@
     <string name="pd_method_directions">Примарни дирекции</string>
     <string name="legend_directed_aspects">Дирекции на %1$s</string>
     <string name="source_code">Изходен код (AGPL-3.0)</string>
+    <!-- Transit time-step chips -->
+    <string name="step_1min">1 мин</string>
+    <string name="step_5min">5 мин</string>
+    <string name="step_10min">10 мин</string>
+    <string name="step_15min">15 мин</string>
+    <string name="step_hour">Час</string>
+    <string name="step_day">Ден</string>
+    <string name="step_week">Седмица</string>
+    <string name="step_month">Месец</string>
+    <string name="step_3months">3 м-ца</string>
+    <string name="step_year">Година</string>
+    <!-- Primary directions UI -->
+    <string name="pd_age_arc">Възраст %1$s г. · дъга %2$s°</string>
+    <string name="pd_perfects">точна %1$s</string>
+    <string name="pd_legend">● директна   ○ конверсна</string>
+    <string name="pd_no_active">Няма точни дирекции около тази дата. Премести датата напред или назад.</string>
 
     <!-- Aspect names -->
     <string name="aspect_conjunction">Конюнкция</string>
@@ -230,4 +246,27 @@
     <string name="sign_capricorn">Козирог</string>
     <string name="sign_aquarius">Водолей</string>
     <string name="sign_pisces">Риби</string>
+
+    <!-- Свързване на натален хороскоп (личност) със събитие -->
+    <string name="event_person">Личност (натален хороскоп)</string>
+    <string name="person_none">Няма</string>
+    <string name="event_person_label">Личност: %1$s</string>
+
+    <!-- Изображение на събитие + галерия -->
+    <string name="event_image">Изображение</string>
+    <string name="event_image_none">Без изображение — в галерията се показва най-точният аспект на картата.</string>
+    <string name="event_image_upload">Качи изображение</string>
+    <string name="event_image_replace">Смени изображението</string>
+    <string name="event_image_delete">Изтрий изображението</string>
+    <string name="event_image_failed">Изображението не може да се зареди.</string>
+    <string name="event_deleted">„%1$s“ е изтрито</string>
+    <string name="undo">ОТМЯНА</string>
+
+    <!-- Падащи менюта за филтриране в галерията -->
+    <string name="ok">Добре</string>
+    <string name="filter_tags">Тагове</string>
+    <string name="filter_tags_count">Тагове (%1$d)</string>
+    <string name="filter_all_persons">Всички личности</string>
+    <string name="filter_no_tags">Без тагове</string>
+    <string name="filter_no_tags_available">Все още няма тагове</string>
 </resources>

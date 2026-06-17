@@ -138,7 +138,7 @@ class NowFragment : Fragment() {
         TransitStep.values().forEach { step ->
             val btn = MaterialButton(ctx, null,
                 com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-                text = step.label
+                text = getString(step.labelRes)
                 textSize = 11f
                 setPadding(16, 0, 16, 0)
                 layoutParams = LinearLayout.LayoutParams(

@@ -35,7 +35,8 @@ class AspectAdapter : ListAdapter<TransitAspect, AspectAdapter.VH>(DIFF) {
         b.tvAspectSymbol.setTextColor(aspectColor(aspect.exactDegree))
         b.tvNatalPlanet.text = nPlanet?.glyph ?: aspect.natalPlanet
         b.tvAspectName.text = aspectNameLocalized(ctx, aspect.aspectName)
-        b.tvOrb.text = ctx.getString(R.string.orb_format, aspect.orb.toString())
+        // Primary directions show the perfection date; transits show the orb.
+        b.tvOrb.text = aspect.perfectionLabel ?: ctx.getString(R.string.orb_format, aspect.orb.toString())
         if (aspect.isApplying) {
             b.tvApplying.text = ctx.getString(R.string.applying)
             b.tvApplying.setTextColor(Color.parseColor("#5A9A6A"))

@@ -46,5 +46,9 @@ data class HistoryEventEntity(
     val description: String = "",
     val tags: String = "",  // comma-separated tag names
     val isGlobal: Boolean = false,
+    // Optional link to the natal chart (BirthDataEntity.id) this event belongs to; null = unassigned.
+    val personId: Long? = null,
+    // Optional user-picked image, copied into internal storage; null = use the generated thumbnail.
+    val imagePath: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )

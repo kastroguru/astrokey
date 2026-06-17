@@ -22,8 +22,8 @@ android {
         applicationId = "eu.kastroguru.astrokey"   // Google Play identity for "Astro Key"
         minSdk = 21
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1"
     }
 
     buildFeatures {
@@ -99,6 +99,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.activity:activity-ktx:1.8.2")   // ActivityResultContracts.PickVisualMedia (photo picker)
 
     // Swiss Ephemeris (Thomas Mack's Java port, accurate planetary positions)
     implementation("com.github.krishnact:swisseph:265f899")

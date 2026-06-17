@@ -14,9 +14,21 @@
         <item name="colorOnBackground">@color/md_theme_dark_onBackground</item>
         <item name="colorSurface">@color/md_theme_dark_surface</item>
         <item name="colorOnSurface">@color/md_theme_dark_onSurface</item>
-        <item name="android:statusBarColor">@color/md_theme_dark_primary</item>
-        <item name="android:navigationBarColor">@color/md_theme_dark_background</item>
+        <!-- Match the toolbar / bottom-nav surface so the system-bar strips blend in. On Android 15
+             (edge-to-edge enforced) these are ignored and the bars are transparent — handled by the
+             inset padding in MainActivity — but they keep older devices consistent. -->
+        <item name="android:statusBarColor">@color/surface_dark</item>
+        <item name="android:navigationBarColor">@color/surface_dark</item>
         <item name="android:windowBackground">@color/md_theme_dark_background</item>
+        <!-- Light (pale) system bars ⇒ dark status/nav icons, readable on the lavender strips. -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- Toolbar on the pale lavender surface: dark title + dark menu/overflow icons. -->
+    <style name="ThemeOverlay.AstroDiary.Toolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Surface">
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="colorControlNormal">@color/text_primary</item>
+        <item name="colorOnSurface">@color/text_primary</item>
     </style>
 
 </resources>

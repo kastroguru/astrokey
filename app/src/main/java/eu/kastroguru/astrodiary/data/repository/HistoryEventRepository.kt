@@ -1,6 +1,7 @@
 package eu.kastroguru.astrodiary.data.repository
 
 import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
+import eu.kastroguru.astrodiary.data.EventImageStore
 import eu.kastroguru.astrodiary.data.db.dao.HistoryEventDao
 import eu.kastroguru.astrodiary.data.db.entity.HistoryEventEntity
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
@@ -19,7 +20,8 @@ import javax.inject.Singleton
 class HistoryEventRepository @Inject constructor(
     private val dao: HistoryEventDao,
     private val astroCalculator: AstroCalculator,
-    private val chartDisplayPrefs: ChartDisplayPrefs
+    private val chartDisplayPrefs: ChartDisplayPrefs,
+    private val imageStore: EventImageStore
 ) {
 
     fun getAll(): Flow<List<HistoryEventEntity>> = dao.getAll()
@@ -28,12 +30,17 @@ class HistoryEventRepository @Inject constructor(
     fun getByMoonSign(signId: Int): Flow<List<HistoryEventEntity>> = dao.getByMoonSign(signId)
     fun getGlobalOnly(): Flow<List<HistoryEventEntity>> = dao.getGlobalOnly()
     fun getByYear(year: Int): Flow<List<HistoryEventEntity>> = dao.getByYear(year)
+    fun getByPerson(personId: Long): Flow<List<HistoryEventEntity>> = dao.getByPerson(personId)
     fun search(query: String): Flow<List<HistoryEventEntity>> = dao.search(query)
 
     suspend fun getById(id: Long): HistoryEventEntity? = dao.getById(id)
     suspend fun insert(entity: HistoryEventEntity) = dao.insert(entity)
+    // delete() keeps the image file so an undo can restore it; call deleteImageFile() once the
+    // delete is permanent (undo window closed). Replacing an image in the form also calls it.
     suspend fun delete(entity: HistoryEventEntity) = dao.delete(entity)
     suspend fun deleteById(id: Long) = dao.deleteById(id)
+    fun deleteImageFile(path: String?) = imageStore.delete(path)
+    suspend fun saveImage(uri: android.net.Uri): String? = imageStore.save(uri)
 
     suspend fun deleteTag(tag: String, deleteEvents: Boolean) {
         val candidates = dao.getCandidatesByTag(tag)
@@ -74,6 +81,8 @@ class HistoryEventRepository @Inject constructor(
         description: String,
         tags: String,
         isGlobal: Boolean,
+        personId: Long? = null,
+        imagePath: String? = null,
         editId: Long = 0L
     ): Result<Long> {
         return try {
@@ -110,7 +119,9 @@ class HistoryEventRepository @Inject constructor(
                 astroData = astroData,
                 description = description,
                 tags = tags,
-                isGlobal = isGlobal
+                isGlobal = isGlobal,
+                personId = personId,
+                imagePath = imagePath
             )
 
             val id = if (editId > 0L) {
@@ -137,7 +148,9 @@ class HistoryEventRepository @Inject constructor(
         astroData: AstroData,
         description: String,
         tags: String,
-        isGlobal: Boolean
+        isGlobal: Boolean,
+        personId: Long?,
+        imagePath: String?
     ): HistoryEventEntity {
         val planets = astroData.planets
         val cusps = astroData.cusps
@@ -184,7 +197,9 @@ class HistoryEventRepository @Inject constructor(
             cusp9 = cusps[8], cusp10 = cusps[9], cusp11 = cusps[10], cusp12 = cusps[11],
             description = description,
             tags = tags,
-            isGlobal = isGlobal
+            isGlobal = isGlobal,
+            personId = personId,
+            imagePath = imagePath
         )
     }
 }

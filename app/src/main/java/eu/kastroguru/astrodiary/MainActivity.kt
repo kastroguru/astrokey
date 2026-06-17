@@ -8,6 +8,10 @@ import android.view.View
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updatePadding
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -27,6 +31,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Android 15 (targetSdk 35) enforces edge-to-edge: the system bars become transparent and
+        // content draws behind them. Pad the toolbar by the status-bar inset (its lavender background
+        // then fills the strip) and the bottom nav by the navigation-bar inset, so neither slips under
+        // a system bar. No-op on older devices, where the system already insets the content.
+        WindowInsetsControllerCompat(window, binding.root).apply {
+            isAppearanceLightStatusBars = true       // dark status icons on the pale strip
+            isAppearanceLightNavigationBars = true
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, insets ->
+            v.updatePadding(top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { v, insets ->
+            v.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom)
+            insets
+        }
 
         setSupportActionBar(binding.toolbar)
 

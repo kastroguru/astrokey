@@ -41,19 +41,21 @@ data class TransitAspect(
     val exactDegree: Int,
     /** Primary-directions only: the promissor's directed longitude (NaN for transit aspects). */
     val directedLon: Double = Double.NaN,
+    /** Primary-directions only: localized "exact <date>" label shown instead of the orb. */
+    val perfectionLabel: String? = null,
 )
 
-enum class TransitStep(val label: String, val millis: Long) {
-    MINUTE("1 мин",     60_000L),
-    MIN5  ("5 мин",   5*60_000L),
-    MIN10 ("10 мин", 10*60_000L),
-    MIN15 ("15 мин", 15*60_000L),
-    HOUR  ("Час",    60*60_000L),
-    DAY   ("Ден",  24*60*60_000L),
-    WEEK  ("Седмица",  7*24*60*60_000L),
-    MONTH ("Месец",   30*24*60*60_000L),
-    MONTH3("3 м-ца",  91*24*60*60_000L),
-    YEAR  ("Година", 365*24*60*60_000L)
+enum class TransitStep(val labelRes: Int, val millis: Long) {
+    MINUTE(R.string.step_1min,  60_000L),
+    MIN5  (R.string.step_5min,  5*60_000L),
+    MIN10 (R.string.step_10min, 10*60_000L),
+    MIN15 (R.string.step_15min, 15*60_000L),
+    HOUR  (R.string.step_hour,  60*60_000L),
+    DAY   (R.string.step_day,   24*60*60_000L),
+    WEEK  (R.string.step_week,  7*24*60*60_000L),
+    MONTH (R.string.step_month, 30*24*60*60_000L),
+    MONTH3(R.string.step_3months, 91*24*60*60_000L),
+    YEAR  (R.string.step_year,  365*24*60*60_000L)
 }
 
 enum class TransitMode { TRANSITS, PRIMARY_DIRECTIONS }
@@ -103,6 +105,26 @@ class TransitViewModel @Inject constructor(
     private var refreshJob: Job? = null
     private val pdCalc = PrimaryDirectionsCalculator()
     private val calcMutex = Mutex()   // serialize shared SwissEph access
+
+    // ── Primary-directions per-natal cache ─────────────────────────────────────
+    // Stepping the transit date only changes the arc of direction; the equatorial chart, the house
+    // cusps and the ~122-sample True-Solar-Arc converter all depend ONLY on the natal chart (+ house
+    // system for the cusps). Recomputing them every step was ~137 Swiss-Eph calls and caused the ANR.
+    // We cache them keyed by a natal signature so a date step costs just the 2-call directedArc.
+    // Only ever read/written inside calcMutex.withLock, so no extra synchronization is needed.
+    private data class PdNatalCache(
+        val natalKey: String,
+        val houseSystem: Char,
+        val birthJd: Double,
+        val eq: PrimaryDirectionsCalculator.EquatorialChart,
+        val cusps: List<Double>,
+        val arcToYears: (Double) -> Double,
+    )
+    private var pdNatalCache: PdNatalCache? = null
+
+    /** Signature that changes whenever the natal data that feeds the cached values changes. */
+    private fun natalSignature(natal: BirthDataEntity): String =
+        "${natal.id}:${natal.yearUtc}-${natal.monthUtc}-${natal.dayUtc}-${natal.hourUtc}-${natal.minutesUtc}:${natal.latitude},${natal.longitude}"
 
     init {
         viewModelScope.launch {
@@ -225,18 +247,36 @@ class TransitViewModel @Inject constructor(
     )
 
     private fun computePrimaryDirections(natal: BirthDataEntity, year: Int, month: Int, day: Int, hour: Double): PdResult {
-        val birthJd = calculator.julianDay(natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc + natal.minutesUtc / 60.0)
-        val selJd   = calculator.julianDay(year, month, day, hour)
-        val age     = ((selJd - birthJd) / 365.2421904).coerceAtLeast(0.0)
+        // Reuse the natal-invariant heavy work (equatorial chart, cusps, arc→years converter) across
+        // date steps; rebuild only when the natal chart or the house system actually changes.
+        val sig         = natalSignature(natal)
+        val houseSystem = chartDisplayPrefs.houseSystemChar
+        val cache = pdNatalCache?.takeIf { it.natalKey == sig && it.houseSystem == houseSystem }
+            ?: run {
+                val birthJd = calculator.julianDay(natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc + natal.minutesUtc / 60.0)
+                PdNatalCache(
+                    natalKey = sig,
+                    houseSystem = houseSystem,
+                    birthJd = birthJd,
+                    eq = calculator.computeEquatorial(natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc, natal.minutesUtc, natal.latitude, natal.longitude),
+                    // House cusps for the configured house system (the natal cusps stored on the entity are Placidus).
+                    cusps = calculator.recalculateCusps(
+                        natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc, natal.minutesUtc,
+                        natal.latitude, natal.longitude, houseSystem,
+                    ),
+                    arcToYears = calculator.trueSolarArcConverter(birthJd, maxYears = 120),  // ~122 Sun-RA samples, built ONCE per natal
+                ).also { pdNatalCache = it }
+            }
 
-        val eq  = calculator.computeEquatorial(natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc, natal.minutesUtc, natal.latitude, natal.longitude)
-        val arc = calculator.directedArc(birthJd, age)
+        val birthJd = cache.birthJd
+        val eq      = cache.eq
+        val cusps   = cache.cusps
+        val toYears = cache.arcToYears
 
-        // House cusps for the configured house system (the natal cusps stored on the entity are Placidus).
-        val cusps = calculator.recalculateCusps(
-            natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc, natal.minutesUtc,
-            natal.latitude, natal.longitude, chartDisplayPrefs.houseSystemChar,
-        )
+        val selJd = calculator.julianDay(year, month, day, hour)
+        val age   = ((selJd - birthJd) / 365.2421904).coerceAtLeast(0.0)
+        val arc   = calculator.directedArc(birthJd, age)   // the only date-dependent Swiss-Eph work (2 calls)
+
         val asc = cusps[0]; val mc = cusps[9]
 
         // Bodies included per the "displayed aspects of objects" settings.
@@ -258,7 +298,6 @@ class TransitViewModel @Inject constructor(
         }
         val allLon = LinkedHashMap(planetLon).apply { putAll(angles) }
         val directed = pdCalc.directedPositions(planetLon, eq.obliquity, arc)
-        val toYears = calculator.trueSolarArcConverter(birthJd, maxYears = 120)  // built once, then O(1) per direction
         val directions = pdCalc.calculate(
             eq = eq, longitudes = allLon,
             promissors = planetLon.keys.toList(),

@@ -345,13 +345,20 @@ class AstroCalculator @Inject constructor(
         return sd.julDay
     }
 
-    fun planetHouse(longitude: Double, cusps: List<Double>): Int {
-        for (i in 0 until 12) {
-            val start = cusps[i]; val end = cusps[(i + 1) % 12]
-            if (if (end > start) longitude >= start && longitude < end
-                else longitude >= start || longitude < end) return i + 1
+    companion object {
+        /**
+         * House (1–12) containing [longitude], given the 12 cusp longitudes in order.
+         * A house spans [cusp, next cusp); the last house wraps across 0°. Pure — no Context — so
+         * it is unit-testable directly via [AstroCalculator.planetHouse].
+         */
+        fun planetHouse(longitude: Double, cusps: List<Double>): Int {
+            for (i in 0 until 12) {
+                val start = cusps[i]; val end = cusps[(i + 1) % 12]
+                if (if (end > start) longitude >= start && longitude < end
+                    else longitude >= start || longitude < end) return i + 1
+            }
+            return 1
         }
-        return 1
     }
 
     /** Recalculates house cusps for an already-stored chart under a different house system. */

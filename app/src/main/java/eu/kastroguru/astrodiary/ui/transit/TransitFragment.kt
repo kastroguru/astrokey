@@ -40,6 +40,8 @@ class TransitFragment : Fragment() {
     // Step chip buttons (built programmatically)
     private val chipButtons = mutableListOf<MaterialButton>()
     private var natalSpinnerNames: List<String> = emptyList()
+    private var lastErrorShown: String? = null
+    private val pdDateFmt = java.text.SimpleDateFormat("MM.yyyy", java.util.Locale.getDefault())
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentTransitBinding.inflate(inflater, container, false)
@@ -121,7 +123,7 @@ class TransitFragment : Fragment() {
         TransitStep.values().forEach { step ->
             val btn = MaterialButton(ctx, null,
                 com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-                text = step.label
+                text = getString(step.labelRes)
                 textSize = 11f
                 setPadding(16, 0, 16, 0)
                 layoutParams = LinearLayout.LayoutParams(
@@ -149,13 +151,22 @@ class TransitFragment : Fragment() {
     private fun updateUI(state: TransitUiState) {
         binding.progressBar.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
+        // Surface calculation errors (once per distinct message) instead of failing silently.
+        val err = state.errorMessage
+        if (err != null && err != lastErrorShown) {
+            Snackbar.make(binding.root, err, Snackbar.LENGTH_LONG).show()
+            lastErrorShown = err
+        } else if (err == null) {
+            lastErrorShown = null
+        }
+
         // Transit date label
         binding.tvTransitDate.text = state.dateLabel
 
         // ── Mode: Transits (linear chart) vs Primary directions (biwheel) ──────
         val pd = state.mode == TransitMode.PRIMARY_DIRECTIONS
         binding.aspectsChart.visibility   = if (pd) View.GONE else View.VISIBLE
-        binding.tvTransitSummary.visibility = if (pd) View.GONE else View.VISIBLE
+        binding.tvTransitSummary.visibility = View.VISIBLE
         binding.pdWheel.visibility         = if (pd) View.VISIBLE else View.GONE
         var pdAspectItems = emptyList<TransitAspect>()
         if (pd) {
@@ -163,6 +174,12 @@ class TransitFragment : Fragment() {
             binding.pdWheel.natalLongitudes = state.pdNatalLongitudes
             binding.pdWheel.directed        = state.pdDirected
             binding.pdWheel.houseCusps      = state.pdCusps
+            // Readout below the wheel: current age + directed arc, plus the marker legend.
+            binding.tvTransitSummary.text = getString(
+                R.string.pd_age_arc,
+                String.format("%.1f", state.pdAgeYears),
+                String.format("%.1f", state.pdCurrentArc),
+            ) + "\n" + getString(R.string.pd_legend)
             // Active = within a 1° orb of arc: |direction's arc − arc reached at the current age|.
             val nowArc = state.pdCurrentArc
             val byKey = state.pdDirected.associateBy { it.key }
@@ -175,7 +192,8 @@ class TransitFragment : Fragment() {
                 )
             }
             // Active-aspects list (same adapter/screen as transits): promissor → significator,
-            // deduped per pair+aspect, tightest orb first. Orb is the arc distance to perfection.
+            // deduped per pair+aspect, tightest orb first; shows the perfection date.
+            val natalBirth = state.natalData
             pdAspectItems = active
                 .groupBy { Triple(it.promissor, it.aspectAngle, it.significator) }
                 .map { (_, g) -> g.minByOrNull { kotlin.math.abs(kotlin.math.abs(it.arc) - nowArc) }!! }
@@ -187,6 +205,13 @@ class TransitFragment : Fragment() {
                         d.isDirect   -> dp.directLon
                         else         -> dp.converseLon
                     }
+                    val perfLabel = natalBirth?.let { nb ->
+                        val cal = java.util.Calendar.getInstance().apply {
+                            set(nb.year, nb.month - 1, nb.day, 0, 0, 0)
+                            add(java.util.Calendar.DAY_OF_YEAR, (d.years * 365.2422).toInt())
+                        }
+                        getString(R.string.pd_perfects, pdDateFmt.format(cal.time))
+                    }
                     TransitAspect(
                         transitPlanet = d.promissor,
                         natalPlanet   = d.significator,
@@ -195,10 +220,12 @@ class TransitFragment : Fragment() {
                         isApplying    = nowArc < kotlin.math.abs(d.arc),  // not yet perfected = applying
                         exactDegree   = d.aspectAngle,
                         directedLon   = dirLon,
+                        perfectionLabel = perfLabel,
                     )
                 }
                 .sortedBy { it.orb }
         }
+        binding.tvNoAspects.visibility = if (pd && pdAspectItems.isEmpty()) View.VISIBLE else View.GONE
 
         // Highlight selected step chip
         chipButtons.forEachIndexed { idx, btn ->

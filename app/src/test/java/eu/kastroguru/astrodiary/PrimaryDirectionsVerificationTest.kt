@@ -173,4 +173,65 @@ class PrimaryDirectionsVerificationTest {
         assertTrue("No MC-conjunction anchors were found to verify", anchorsChecked > 0)
         println("Analytic MC anchor verified for $anchorsChecked bodies.")
     }
+
+    /**
+     * The True Solar Equatorial Arc key (the app's only exposed key) maps an arc of direction to an
+     * age. This pins two properties of that map: it is strictly increasing (a larger arc is always
+     * reached later in life), and inverting it — bisecting for the arc that yields a target age —
+     * round-trips back to the original arc.
+     */
+    @Test
+    fun trueSolarArcYearsIsMonotonicAndRoundTrips() {
+        val swe = SwissEph()
+        val epheDir = File("src/main/assets/ephe").absoluteFile
+        if (epheDir.isDirectory) swe.swe_set_ephe_path(epheDir.absolutePath)
+
+        val jd = SweDate(year, month, day, hourUtc, SweDate.SE_GREG_CAL).julDay
+        val xx = DoubleArray(6); val err = StringBuffer()
+
+        fun sunRa(jdv: Double): Pair<Double, Double> {
+            var rc = swe.swe_calc_ut(jdv, SweConst.SE_SUN, SweConst.SEFLG_SWIEPH or SweConst.SEFLG_EQUATORIAL or SweConst.SEFLG_SPEED, xx, err)
+            if (rc < 0) rc = swe.swe_calc_ut(jdv, SweConst.SE_SUN, SweConst.SEFLG_MOSEPH or SweConst.SEFLG_EQUATORIAL or SweConst.SEFLG_SPEED, xx, err)
+            return xx[0] to xx[3]
+        }
+        val sunRa0 = sunRa(jd).first
+        fun trueSolarArcYears(arcDeg: Double): Double {
+            if (arcDeg <= 0.0) return 0.0
+            var t = arcDeg / 0.98565
+            repeat(10) {
+                val (raT, sp) = sunRa(jd + t)
+                var adv = (raT - sunRa0) % 360.0; if (adv < 0) adv += 360.0
+                val rate = if (sp > 0.05) sp else 0.9856
+                val next = t - (adv - arcDeg) / rate
+                t = if (next < 0) 0.0 else next
+            }
+            return t
+        }
+
+        // Strictly increasing across the lifetime range.
+        var prev = -1.0
+        var arc = 1.0
+        while (arc <= 100.0) {
+            val years = trueSolarArcYears(arc)
+            assertTrue("years should be positive for arc=$arc, got $years", years > 0.0)
+            assertTrue("years not increasing at arc=$arc: $prev -> $years", years > prev)
+            prev = years
+            arc += 1.0
+        }
+
+        // Round-trip: pick an arc, get its age, bisect for the arc that reproduces that age.
+        for (trueArc in listOf(7.5, 23.0, 41.3, 66.0, 88.8)) {
+            val targetYears = trueSolarArcYears(trueArc)
+            var lo = 0.0; var hi = 120.0
+            repeat(60) {
+                val mid = (lo + hi) / 2.0
+                if (trueSolarArcYears(mid) < targetYears) lo = mid else hi = mid
+            }
+            val recovered = (lo + hi) / 2.0
+            assertTrue(
+                "arc↔years round-trip failed: $trueArc → ${targetYears}y → $recovered",
+                abs(recovered - trueArc) < 1e-3,
+            )
+        }
+    }
 }

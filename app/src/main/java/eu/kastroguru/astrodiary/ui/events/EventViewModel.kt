@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.kastroguru.astrodiary.data.LocationCache
+import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.db.entity.HistoryEventEntity
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
 import eu.kastroguru.astrodiary.data.network.NominatimResult
+import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import eu.kastroguru.astrodiary.data.repository.HistoryEventRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -14,14 +16,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class EventSortOrder { DATE_DESC, DATE_ASC, NAME_ASC }
-enum class EventFilterType { ALL, TAG, SUN_SIGN, MOON_SIGN, YEAR, GLOBAL, SEARCH }
 
+/**
+ * Gallery filter: an optional person (natal chart) AND an optional set of tags. An event matches if
+ * (no person selected OR it belongs to that person) AND (no tags selected OR it carries any of them).
+ */
 data class EventFilter(
-    val type: EventFilterType = EventFilterType.ALL,
-    val tag: String? = null,
-    val signId: Int? = null,
-    val year: Int? = null,
-    val searchQuery: String = "",
+    val personId: Long? = null,
+    val tags: Set<String> = emptySet(),
     val sortOrder: EventSortOrder = EventSortOrder.DATE_DESC
 )
 
@@ -42,6 +44,7 @@ sealed class EventFormState {
 @HiltViewModel
 class EventViewModel @Inject constructor(
     private val repository: HistoryEventRepository,
+    private val birthDataRepository: BirthDataRepository,
     private val geocodingApi: GeocodingApi,
     private val locationCache: LocationCache
 ) : ViewModel() {
@@ -58,61 +61,61 @@ class EventViewModel @Inject constructor(
     private val _availableTags = MutableStateFlow<List<String>>(emptyList())
     val availableTags: StateFlow<List<String>> = _availableTags.asStateFlow()
 
-    private val _availableYears = MutableStateFlow<List<Int>>(emptyList())
-    val availableYears: StateFlow<List<Int>> = _availableYears.asStateFlow()
-
     private val _filter = MutableStateFlow(EventFilter())
     val filter: StateFlow<EventFilter> = _filter.asStateFlow()
+
+    // Natal charts available to assign as an event's "person".
+    private val _availablePersons = MutableStateFlow<List<BirthDataEntity>>(emptyList())
+    val availablePersons: StateFlow<List<BirthDataEntity>> = _availablePersons.asStateFlow()
 
     init {
         loadAll()
         watchMetadata()
+        watchPersons()
+    }
+
+    private fun watchPersons() {
+        viewModelScope.launch {
+            birthDataRepository.getAll().collect { _availablePersons.value = it }
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadAll() {
         viewModelScope.launch {
             _filter.flatMapLatest { f ->
-                when (f.type) {
-                    EventFilterType.ALL -> repository.getAll()
-                    EventFilterType.TAG -> repository.getByTag(f.tag ?: return@flatMapLatest repository.getAll())
-                    EventFilterType.SUN_SIGN -> repository.getBySunSign(f.signId ?: return@flatMapLatest repository.getAll())
-                    EventFilterType.MOON_SIGN -> repository.getByMoonSign(f.signId ?: return@flatMapLatest repository.getAll())
-                    EventFilterType.YEAR -> repository.getByYear(f.year ?: return@flatMapLatest repository.getAll())
-                    EventFilterType.GLOBAL -> repository.getGlobalOnly()
-                    EventFilterType.SEARCH -> if (f.searchQuery.isBlank()) repository.getAll()
-                                              else repository.search(f.searchQuery)
+                val base = if (f.personId != null) repository.getByPerson(f.personId) else repository.getAll()
+                base.map { items ->
+                    val byTags = if (f.tags.isEmpty()) items
+                                 else items.filter { e -> tagsOf(e).any { it in f.tags } }
+                    when (f.sortOrder) {
+                        EventSortOrder.DATE_DESC -> byTags
+                        EventSortOrder.DATE_ASC  -> byTags.reversed()
+                        EventSortOrder.NAME_ASC  -> byTags.sortedBy { it.name }
+                    }
                 }
-            }.map { items ->
-                when (_filter.value.sortOrder) {
-                    EventSortOrder.DATE_DESC -> items
-                    EventSortOrder.DATE_ASC  -> items.reversed()
-                    EventSortOrder.NAME_ASC  -> items.sortedBy { it.name }
-                }
-            }.collect { items ->
-                _uiState.value = EventUiState.Success(items)
-            }
+            }.collect { items -> _uiState.value = EventUiState.Success(items) }
         }
     }
 
-    // Derives tags and years reactively from Room so any DB change (insert/delete from
-    // any ViewModel scope) automatically updates the chip filter bar.
+    // The tags offered in the filter depend on the selected person: when one is chosen, only that
+    // person's events' tags are shown. Reactive to Room so it stays in sync with any change.
     private fun watchMetadata() {
         viewModelScope.launch {
-            repository.getAll().collect { events ->
-                _availableTags.value = events
-                    .flatMap { e -> e.tags.split(",").map { it.trim() }.filter { it.isNotBlank() } }
-                    .distinct()
-                    .sorted()
-                _availableYears.value = events.map { it.year }.distinct().sortedDescending()
-            }
+            combine(repository.getAll(), _filter.map { it.personId }.distinctUntilChanged()) { events, personId ->
+                val scoped = if (personId != null) events.filter { it.personId == personId } else events
+                scoped.flatMap { tagsOf(it) }.distinct().sorted()
+            }.collect { _availableTags.value = it }
         }
     }
 
-    fun setFilter(filter: EventFilter) { _filter.value = filter }
+    private fun tagsOf(e: HistoryEventEntity): List<String> =
+        e.tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
+
     fun clearFilter() { _filter.value = EventFilter() }
-    fun setTagFilter(tag: String?) { _filter.value = if (tag == null) EventFilter() else EventFilter(type = EventFilterType.TAG, tag = tag) }
-    fun setSearch(query: String) { _filter.value = EventFilter(type = EventFilterType.SEARCH, searchQuery = query) }
+    /** Selecting a person resets tags, since the available tag set changes with the person. */
+    fun setPersonFilter(personId: Long?) { _filter.value = _filter.value.copy(personId = personId, tags = emptySet()) }
+    fun setTags(tags: Set<String>) { _filter.value = _filter.value.copy(tags = tags) }
     fun setSortOrder(order: EventSortOrder) { _filter.value = _filter.value.copy(sortOrder = order) }
 
     fun selectItem(id: Long) {
@@ -160,14 +163,15 @@ class EventViewModel @Inject constructor(
     fun calculateAndSave(
         name: String, year: Int, month: Int, day: Int, hour: Int, minutes: Int,
         city: String, country: String, timezoneId: String, latitude: Double, longitude: Double,
-        description: String, tags: String, isGlobal: Boolean, editId: Long = 0L
+        description: String, tags: String, isGlobal: Boolean, personId: Long? = null,
+        imagePath: String? = null, editId: Long = 0L
     ) {
         viewModelScope.launch {
             _formState.value = EventFormState.Loading
             val result = repository.calculateAndSave(
                 name, year, month, day, hour, minutes,
                 city, country, timezoneId, latitude, longitude,
-                description, tags, isGlobal, editId
+                description, tags, isGlobal, personId, imagePath, editId
             )
             if (result.isSuccess) {
                 _formState.value = EventFormState.Success(result.getOrThrow())
@@ -179,10 +183,9 @@ class EventViewModel @Inject constructor(
 
     fun resetFormState() { _formState.value = EventFormState.Idle }
 
-    fun refreshTags() {
-        viewModelScope.launch {
-            _availableTags.value = repository.getAllTags()
-            _availableYears.value = repository.getAllYears()
-        }
-    }
+    /** Copies a picked image into internal storage; returns its stored path (null on failure). */
+    suspend fun saveImage(uri: android.net.Uri): String? = repository.saveImage(uri)
+
+    /** Removes an owned image file (on replace, on image delete, or once a delete is permanent). */
+    fun deleteImageFile(path: String?) = repository.deleteImageFile(path)
 }

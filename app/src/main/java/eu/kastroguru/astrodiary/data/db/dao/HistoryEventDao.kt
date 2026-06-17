@@ -31,6 +31,9 @@ interface HistoryEventDao {
     @Query("SELECT * FROM history_events WHERE year = :year ORDER BY month DESC, day DESC")
     fun getByYear(year: Int): Flow<List<HistoryEventEntity>>
 
+    @Query("SELECT * FROM history_events WHERE personId = :personId ORDER BY year DESC, month DESC, day DESC")
+    fun getByPerson(personId: Long): Flow<List<HistoryEventEntity>>
+
     @Query("SELECT DISTINCT tags FROM history_events WHERE tags != ''")
     suspend fun getAllTagStrings(): List<String>
 

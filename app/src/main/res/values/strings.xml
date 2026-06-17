@@ -76,6 +76,22 @@
     <string name="pd_method_directions">Primary directions</string>
     <string name="legend_directed_aspects">Directed aspects of %1$s</string>
     <string name="source_code">Source code (AGPL-3.0)</string>
+    <!-- Transit time-step chips -->
+    <string name="step_1min">1 min</string>
+    <string name="step_5min">5 min</string>
+    <string name="step_10min">10 min</string>
+    <string name="step_15min">15 min</string>
+    <string name="step_hour">Hour</string>
+    <string name="step_day">Day</string>
+    <string name="step_week">Week</string>
+    <string name="step_month">Month</string>
+    <string name="step_3months">3 mo</string>
+    <string name="step_year">Year</string>
+    <!-- Primary directions UI -->
+    <string name="pd_age_arc">Age %1$s y · directed arc %2$s°</string>
+    <string name="pd_perfects">exact %1$s</string>
+    <string name="pd_legend">● direct   ○ converse</string>
+    <string name="pd_no_active">No exact directions near this date. Move the date forward or back.</string>
 
     <!-- Aspect names -->
     <string name="aspect_conjunction">Conjunction</string>
@@ -230,4 +246,27 @@
     <string name="sign_capricorn">Capricorn</string>
     <string name="sign_aquarius">Aquarius</string>
     <string name="sign_pisces">Pisces</string>
+
+    <!-- Assign a natal chart (person) to an event -->
+    <string name="event_person">Person (natal chart)</string>
+    <string name="person_none">None</string>
+    <string name="event_person_label">Person: %1$s</string>
+
+    <!-- Event image + gallery -->
+    <string name="event_image">Image</string>
+    <string name="event_image_none">No image — the gallery shows the chart\'s most-exact aspect.</string>
+    <string name="event_image_upload">Upload image</string>
+    <string name="event_image_replace">Replace image</string>
+    <string name="event_image_delete">Delete image</string>
+    <string name="event_image_failed">Couldn\'t load that image.</string>
+    <string name="event_deleted">"%1$s" deleted</string>
+    <string name="undo">UNDO</string>
+
+    <!-- Gallery filter dropdowns -->
+    <string name="ok">OK</string>
+    <string name="filter_tags">Tags</string>
+    <string name="filter_tags_count">Tags (%1$d)</string>
+    <string name="filter_all_persons">All people</string>
+    <string name="filter_no_tags">No tags</string>
+    <string name="filter_no_tags_available">No tags yet</string>
 </resources>

@@ -23,7 +23,7 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "astro_diary.db"
-        ).build()
+        ).addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
     }
 
     @Provides

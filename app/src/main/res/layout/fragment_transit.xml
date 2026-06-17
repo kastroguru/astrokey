@@ -218,6 +218,17 @@
                         android:nestedScrollingEnabled="false"
                         android:divider="@null" />
 
+                    <TextView
+                        android:id="@+id/tvNoAspects"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pd_no_active"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:visibility="gone" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
