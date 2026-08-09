@@ -16,14 +16,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "eu.kastroguru.astrodiary"   // internal code package — not user-visible
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "eu.kastroguru.astrokey"   // Google Play identity for "Astro Key"
         minSdk = 21
-        targetSdk = 35
-        versionCode = 3
-        versionName = "1.1"
+        targetSdk = 36   // Android 16 — Google Play target-API requirement (deadline 31.08.2026)
+        versionCode = 4
+        versionName = "1.2"
     }
 
     buildFeatures {
@@ -70,8 +70,8 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.0")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-android-compiler:2.48")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.4")
