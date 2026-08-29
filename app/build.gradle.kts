@@ -22,12 +22,13 @@ android {
         applicationId = "eu.kastroguru.astrokey"   // Google Play identity for "Astro Key"
         minSdk = 21
         targetSdk = 36   // Android 16 — Google Play target-API requirement (deadline 31.08.2026)
-        versionCode = 4
-        versionName = "1.2"
+        versionCode = 5
+        versionName = "1.3"
     }
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true      // version name + debug flag for the Nominatim user agent
     }
 
     compileOptions {
@@ -53,7 +54,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

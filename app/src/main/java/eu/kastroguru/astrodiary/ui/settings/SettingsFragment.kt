@@ -10,6 +10,8 @@ import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
+import eu.kastroguru.astrodiary.data.ReadingMode
+import eu.kastroguru.astrodiary.data.ReadingModeStore
 import eu.kastroguru.astrodiary.data.AspectPrefs
 import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
 import eu.kastroguru.astrodiary.databinding.FragmentSettingsBinding
@@ -17,6 +19,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
+
+    @Inject lateinit var readingModeStore: ReadingModeStore
 
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +53,30 @@ class SettingsFragment : Fragment() {
                 .setSingleChoiceItems(houseSystemNames, current) { dialog, which ->
                     chartDisplayPrefs.houseSystem = houseSystemValues[which]
                     updateHouseSystemLabel()
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
+        // Reading mode — the same question asked on first run, changeable at any time.
+        fun renderMode() {
+            binding.tvReadingModeValue.text = getString(
+                if (readingModeStore.current == ReadingMode.PLAIN) R.string.mode_plain_short
+                else R.string.mode_astrologer_short
+            )
+        }
+        renderMode()
+        binding.rowReadingMode.setOnClickListener {
+            val labels = arrayOf(
+                getString(R.string.mode_plain_short) + " — " + getString(R.string.mode_plain_answer),
+                getString(R.string.mode_astrologer_short) + " — " + getString(R.string.mode_astrologer_answer),
+            )
+            val current = if (readingModeStore.current == ReadingMode.PLAIN) 0 else 1
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.mode_setting_title)
+                .setSingleChoiceItems(labels, current) { dialog, which ->
+                    readingModeStore.choose(if (which == 0) ReadingMode.PLAIN else ReadingMode.ASTROLOGER)
+                    renderMode()
                     dialog.dismiss()
                 }
                 .show()

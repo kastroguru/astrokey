@@ -3,6 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_chart"
+        android:icon="@drawable/ic_chart_wheel"
+        android:title="@string/show_chart"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_help"
+        android:icon="@drawable/ic_help_circle"
+        android:title="@string/help_title"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_burger"
         android:icon="@drawable/ic_burger_menu"
         android:title="@string/settings"

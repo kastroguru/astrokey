@@ -340,6 +340,27 @@ class AstroCalculator @Inject constructor(
 
     // ── Utilities ─────────────────────────────────────────────────────────────
 
+    /**
+     * Ecliptic longitude of a single body at [jd] (UT) — one Swiss Ephemeris call instead of a whole
+     * chart. Used to scan a transit across time (see [TransitTimeline]); returns null if the body
+     * cannot be computed even from the built-in Moshier ephemeris.
+     */
+    fun longitudeAt(key: String, jd: Double): Double? {
+        val id = PLANET_IDS.firstOrNull { it.first == key }?.second ?: return null
+        val xx = DoubleArray(6)
+        val err = StringBuffer()
+        var rc = swe.swe_calc_ut(jd, id, SweConst.SEFLG_SWIEPH or SweConst.SEFLG_SPEED, xx, err)
+        if (rc < 0) {
+            rc = swe.swe_calc_ut(jd, id, SweConst.SEFLG_MOSEPH or SweConst.SEFLG_SPEED, xx, err)
+            if (rc < 0) return null
+        }
+        return normalizeAngle(xx[0])
+    }
+
+    /** Unix epoch millis → Julian day (UT), and back. */
+    fun julianDayFromMs(ms: Long): Double = 2440587.5 + ms / 86_400_000.0
+    fun msFromJulianDay(jd: Double): Long = Math.round((jd - 2440587.5) * 86_400_000.0)
+
     fun julianDay(year: Int, month: Int, day: Int, hour: Double): Double {
         val sd = SweDate(year, month, day, hour, SweDate.SE_GREG_CAL)
         return sd.julDay

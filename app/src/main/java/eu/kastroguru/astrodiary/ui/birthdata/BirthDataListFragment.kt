@@ -19,12 +19,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
+import eu.kastroguru.astrodiary.data.ReadingMode
+import eu.kastroguru.astrodiary.data.ReadingModeStore
+import javax.inject.Inject
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.databinding.FragmentBirthDataListBinding
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class BirthDataListFragment : Fragment() {
+
+    @Inject lateinit var readingModeStore: ReadingModeStore
 
     private var _binding: FragmentBirthDataListBinding? = null
     private val binding get() = _binding!!
@@ -41,10 +46,15 @@ class BirthDataListFragment : Fragment() {
 
         adapter = BirthDataAdapter(
             onClick = { entity ->
-                findNavController().navigate(
-                    R.id.action_birthDataListFragment_to_birthDataDetailFragment,
-                    Bundle().apply { putLong("birthDataId", entity.id) }
-                )
+                // Plain mode opens the reading; astrologer mode opens the chart data, as before.
+                val args = Bundle().apply { putLong("birthDataId", entity.id) }
+                if (readingModeStore.current == ReadingMode.PLAIN) {
+                    findNavController().navigate(R.id.chartReadingFragment, args)
+                } else {
+                    findNavController().navigate(
+                        R.id.action_birthDataListFragment_to_birthDataDetailFragment, args
+                    )
+                }
             },
             onLongClick = { /* handled by swipe */ }
         )

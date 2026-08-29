@@ -82,6 +82,9 @@ class EventListFragment : Fragment() {
                 binding.buttonTags.text =
                     if (f.tags.isEmpty()) getString(R.string.filter_tags)
                     else getString(R.string.filter_tags_count, f.tags.size)
+                // The person can also change from another screen (app-wide selection) — keep the
+                // dropdown in step without re-firing onItemSelected.
+                syncPersonSpinner(f.personId)
             }
         }
 
@@ -115,6 +118,16 @@ class EventListFragment : Fragment() {
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+    }
+
+    /** Moves the spinner to [personId] without treating it as a user selection. */
+    private fun syncPersonSpinner(personId: Long?) {
+        val idx = if (personId == null) 0
+                  else persons.indexOfFirst { it.id == personId }.let { if (it < 0) 0 else it + 1 }
+        if (binding.spinnerPerson.selectedItemPosition == idx) return
+        bindingPersonSpinner = true
+        binding.spinnerPerson.setSelection(idx)
+        binding.spinnerPerson.post { bindingPersonSpinner = false }
     }
 
     private fun rebuildPersonSpinner() {

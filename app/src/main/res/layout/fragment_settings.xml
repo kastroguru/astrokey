@@ -77,6 +77,32 @@
                     android:layout_marginVertical="8dp"
                     android:background="@color/card_stroke" />
 
+                <LinearLayout
+                    android:id="@+id/rowReadingMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/mode_setting_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/tvReadingModeValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/gold"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switchShowDignities"
                     android:layout_width="match_parent"

@@ -43,7 +43,7 @@ class LanguagePickerFragment : Fragment() {
         val currentTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
         if (currentTag.startsWith(tag)) {
             // Locale unchanged — no activity recreate will happen, navigate manually.
-            findNavController().navigate(R.id.action_languagePickerFragment_to_birthDataListFragment)
+            findNavController().navigate(R.id.action_languagePickerFragment_to_readingModePickerFragment)
         } else {
             // Locale changed — activity recreates; MainActivity routes to birthDataListFragment.
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))

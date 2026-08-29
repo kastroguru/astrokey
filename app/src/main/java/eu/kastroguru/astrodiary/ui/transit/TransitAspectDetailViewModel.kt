@@ -8,16 +8,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
+import eu.kastroguru.astrodiary.domain.RulershipChain
 import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
+import eu.kastroguru.astrodiary.domain.calculator.TransitTimeline
 import eu.kastroguru.astrodiary.domain.model.AstroData
+import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.TimeZone
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 data class FocusAspectState(
     val natal: BirthDataEntity? = null,
@@ -27,7 +34,11 @@ data class FocusAspectState(
     val focusTransitKey: String = "",
     val natalRulerKey: String = "",
     val transitRulerKey: String = "",
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    /** When this aspect starts, perfects (possibly more than once) and fades. */
+    val passage: TransitTimeline.Passage? = null,
+    /** True once the scan has finished — a null [passage] then means "no dates", not "still working". */
+    val timingDone: Boolean = false,
 )
 
 @HiltViewModel
@@ -41,7 +52,14 @@ class TransitAspectDetailViewModel @Inject constructor(
     private val _state = MutableStateFlow(FocusAspectState())
     val state: StateFlow<FocusAspectState> = _state.asStateFlow()
 
-    fun load(natalDataId: Long, transitMs: Long, focusNatalKey: String, focusTransitKey: String) {
+    fun load(
+        natalDataId: Long,
+        transitMs: Long,
+        focusNatalKey: String,
+        focusTransitKey: String,
+        aspectDeg: Int = -1,
+        isPd: Boolean = false,
+    ) {
         viewModelScope.launch {
             val natal = repository.getAll().first().find { it.id == natalDataId } ?: return@launch
             val hs = chartDisplayPrefs.houseSystemChar
@@ -70,6 +88,24 @@ class TransitAspectDetailViewModel @Inject constructor(
                 transitRulerKey = signRuler(transitSignId),
                 isLoading       = false
             )
+
+            // Directions carry their own "exact on" date, so the transit scan applies to transits only.
+            if (isPd || aspectDeg < 0) {
+                _state.value = _state.value.copy(timingDone = true)
+            } else {
+                val passage = withContext(Dispatchers.Default) {
+                    val job = coroutineContext[Job]
+                    TransitTimeline.passage(
+                        transitKey     = focusTransitKey,
+                        natalLongitude = natalFocusDeg,
+                        aspectDeg      = aspectDeg,
+                        orb            = TransitTimeline.TRANSIT_ORB_DEG,
+                        nowJd          = calculator.julianDayFromMs(transitMs),
+                        isActive       = { job?.isActive != false },
+                    ) { jd -> calculator.longitudeAt(focusTransitKey, jd) }
+                }
+                _state.value = _state.value.copy(passage = passage, timingDone = true)
+            }
         }
     }
 
@@ -81,10 +117,7 @@ class TransitAspectDetailViewModel @Inject constructor(
         "lilith"  -> e.lilithD; else    -> 0.0
     }
 
-    private fun signRuler(signId: Int): String = when (signId) {
-        1 -> "mars";    2 -> "venus";   3 -> "mercury"; 4 -> "moon"
-        5 -> "sun";     6 -> "mercury"; 7 -> "venus";   8 -> "pluto"
-        9 -> "jupiter"; 10 -> "saturn"; 11 -> "uranus"; 12 -> "neptune"
-        else -> "sun"
-    }
+    /** Ancient rulers, from the one place that decides them (see [RulershipChain]). */
+    private fun signRuler(signId: Int): String =
+        RulershipChain.rulerOfSign(ZodiacSign.fromId(signId))
 }

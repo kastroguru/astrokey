@@ -37,13 +37,13 @@ class EventAdapter(
             // there's no photo it draws the most-exact-aspect art instead.
             val file = entity.imagePath?.let { File(it) }
             b.thumbView.bitmap = if (file != null && file.exists()) decodeScaled(file, TARGET_PX) else null
-            b.thumbView.data = buildThumbData(entity)
+            b.thumbView.data = buildThumbData(entity, b.root.context)
             b.root.setOnClickListener { onClick(entity) }
             b.root.setOnLongClickListener { onLongClick(entity); true }
         }
     }
 
-    private fun buildThumbData(entity: HistoryEventEntity): EventThumbnailView.Data {
+    private fun buildThumbData(entity: HistoryEventEntity, context: android.content.Context): EventThumbnailView.Data {
         val asp = EventAspects.mostExact(entity)
         val a = asp?.pointA ?: "sun"
         val c = asp?.pointB ?: "moon"
@@ -53,6 +53,7 @@ class EventAdapter(
             glyphA = glyphOf(a), colorA = PlanetColors.of(a),
             glyphB = glyphOf(c), colorB = PlanetColors.of(c),
             aspectSymbol = aspectSymbol(asp?.angle ?: 0), aspectColor = aspectColor(asp?.angle ?: 0),
+            aspectLabel = EventAspectPhrase.aspectName(context, asp?.angle ?: 0),
             sunSign = signGlyph(entity.sunS), sunColor = PlanetColors.of("sun"),
             moonSign = signGlyph(entity.moonS), moonColor = PlanetColors.of("moon"),
             city = entity.city, datetime = datetime,

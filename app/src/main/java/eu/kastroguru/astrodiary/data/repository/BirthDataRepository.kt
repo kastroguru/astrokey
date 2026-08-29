@@ -4,6 +4,7 @@ import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
 import eu.kastroguru.astrodiary.data.db.dao.BirthDataDao
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
+import eu.kastroguru.astrodiary.data.network.searchPlaces
 import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.model.AstroData
 import eu.kastroguru.astrodiary.domain.model.PlanetPosition
@@ -34,7 +35,7 @@ class BirthDataRepository @Inject constructor(
     suspend fun geocodeCity(city: String, country: String): Result<Pair<Double, Double>> {
         return try {
             val query = if (country.isNotBlank()) "$city, $country" else city
-            val results = geocodingApi.search(query)
+            val results = geocodingApi.searchPlaces(query)
             if (results.isNotEmpty()) {
                 val lat = results[0].lat.toDouble()
                 val lon = results[0].lon.toDouble()

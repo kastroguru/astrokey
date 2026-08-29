@@ -202,14 +202,15 @@
                             android:textAllCaps="true"
                             android:letterSpacing="0.1" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tap_for_details"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="11sp" />
-
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/aspect_tap_hint"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvAspects"

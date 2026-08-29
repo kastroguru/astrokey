@@ -13,11 +13,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.databinding.FragmentTransitAspectDetailBinding
+import eu.kastroguru.astrodiary.domain.calculator.TransitTimeline
 import eu.kastroguru.astrodiary.domain.humandesign.TransitInterpretations
 import eu.kastroguru.astrodiary.domain.model.Planet
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import eu.kastroguru.astrodiary.ui.chart.localizedName
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class TransitAspectDetailFragment : Fragment() {
@@ -27,6 +31,8 @@ class TransitAspectDetailFragment : Fragment() {
     private val viewModel: TransitAspectDetailViewModel by viewModels()
 
     private var isPd = false
+    private var aspectDeg = -1
+    private var transitMs = 0L
     private var directedLon = Double.NaN   // primary directions: the promissor's directed longitude
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -40,11 +46,12 @@ class TransitAspectDetailFragment : Fragment() {
         val natalKey   = arguments?.getString("natalPlanetKey")   ?: return
         val transitKey = arguments?.getString("transitPlanetKey") ?: return
         val natalId    = arguments?.getLong("natalDataId")        ?: return
-        val transitMs  = arguments?.getLong("transitMs")          ?: return
+        transitMs = arguments?.getLong("transitMs") ?: return
         isPd = arguments?.getBoolean("isPd") ?: false
         directedLon = (arguments?.getFloat("directedLon") ?: -1f).toDouble().let { if (it < 0) Double.NaN else it }
 
-        viewModel.load(natalId, transitMs, natalKey, transitKey)
+        aspectDeg = arguments?.getInt("aspectDeg") ?: -1
+        viewModel.load(natalId, transitMs, natalKey, transitKey, aspectDeg, isPd)
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -110,6 +117,8 @@ class TransitAspectDetailFragment : Fragment() {
             tPlanet?.localizedName(requireContext()) ?: state.focusTransitKey)
         binding.tvLegendCross.text   = getString(R.string.legend_cross_aspect)
 
+        renderTiming(state)
+
         // ── Interpretation ────────────────────────────────────────────────────
         val isBg = AppCompatDelegate.getApplicationLocales().toLanguageTags().startsWith("bg")
         val interp = TransitInterpretations.getGeneral(state.focusTransitKey, state.focusNatalKey)
@@ -119,6 +128,64 @@ class TransitAspectDetailFragment : Fragment() {
         } else {
             binding.tvInterpretation.visibility = View.GONE
         }
+    }
+
+    /**
+     * A transit is a stretch of time, not a moment: it drifts into orb, perfects — sometimes three
+     * times, when the planet turns retrograde over the same degree — and fades.
+     */
+    private fun renderTiming(state: FocusAspectState) {
+        val passage = state.passage
+        if (passage == null) {
+            // Scanning an outer planet's whole retrograde loop takes a few seconds — say so rather
+            // than letting the card pop in unannounced. Once the scan is done with nothing to show
+            // (an ephemeris that cannot place the body), drop the card instead of waiting forever.
+            val working = !isPd && aspectDeg >= 0 && !state.timingDone
+            binding.cardWindow.visibility = if (working) View.VISIBLE else View.GONE
+            binding.tvWindowRange.text = if (working) getString(R.string.aspect_window_calculating) else ""
+            binding.tvWindowExact.text = ""
+            binding.tvWindowNote.visibility = View.GONE
+            setGraphVisible(false)
+            return
+        }
+        binding.cardWindow.visibility = View.VISIBLE
+        val fmt = SimpleDateFormat("d MMMM yyyy", Locale.getDefault())
+        fun date(ms: Long) = fmt.format(Date(ms))
+
+        binding.tvWindowRange.text = when {
+            passage.enterMs != null && passage.exitMs != null ->
+                getString(R.string.aspect_window_range, date(passage.enterMs), date(passage.exitMs))
+            passage.exitMs != null  -> getString(R.string.aspect_window_until, date(passage.exitMs))
+            passage.enterMs != null -> getString(R.string.aspect_window_from, date(passage.enterMs))
+            else -> getString(R.string.aspect_window_long)
+        }
+        binding.tvWindowExact.text = when (passage.exactMs.size) {
+            0 -> getString(R.string.aspect_exact_none)
+            1 -> getString(R.string.aspect_exact_one, date(passage.exactMs[0]))
+            else -> getString(
+                R.string.aspect_exact_many,
+                passage.exactMs.size,
+                passage.exactMs.joinToString("  ·  ") { date(it) }
+            )
+        }
+        binding.tvWindowNote.visibility = if (passage.isRepeating) View.VISIBLE else View.GONE
+
+        val hasCurve = passage.curve.any { it.strength > 0.0 }
+        setGraphVisible(hasCurve)
+        if (hasCurve) {
+            binding.aspectStrength.data = AspectStrengthView.Data(
+                curve = passage.curve,
+                exactMs = passage.exactMs,
+                nowMs = transitMs,
+            )
+        }
+    }
+
+    private fun setGraphVisible(visible: Boolean) {
+        val v = if (visible) View.VISIBLE else View.GONE
+        binding.tvGraphTitle.visibility = v
+        binding.aspectStrength.visibility = v
+        binding.tvGraphCaption.visibility = v
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

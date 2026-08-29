@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.core.view.isVisible
 import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
+import eu.kastroguru.astrodiary.domain.EventAspects
 import eu.kastroguru.astrodiary.databinding.FragmentEventDetailBinding
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -47,10 +48,19 @@ class EventDetailFragment : Fragment() {
                 binding.textDateTime.text = "%04d-%02d-%02d %02d:%02d".format(
                     entity.year, entity.month, entity.day, entity.hour, entity.minutes
                 )
-                binding.textLocation.text = "${entity.city}, ${entity.country}"
+                binding.textLocation.text =
+                    listOf(entity.city, entity.country).filter { it.isNotBlank() }.joinToString(", ")
                 binding.textTimezone.text = entity.timezone
                 binding.textDescription.text = entity.description.ifBlank { getString(R.string.no_description) }
                 binding.textTags.text = entity.tags.ifBlank { getString(R.string.no_tags) }
+
+                // The same aspect the gallery draws as glyphs, said in words.
+                EventAspects.mostExact(entity)?.let { aspect ->
+                    binding.textSkyLine.text =
+                        "${EventAspectPhrase.sentence(requireContext(), aspect)} · " +
+                        EventAspectPhrase.exactness(requireContext(), aspect)
+                    binding.textSkyMeaning.text = EventAspectPhrase.meaning(requireContext(), aspect.angle)
+                }
                 binding.textGlobal.text = if (entity.isGlobal) getString(R.string.global_event) else getString(R.string.personal_event)
 
                 val personName = entity.personId?.let { id -> persons.find { it.id == id }?.name }

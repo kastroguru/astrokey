@@ -2,11 +2,16 @@ package eu.kastroguru.astrodiary.ui.events
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.kastroguru.astrodiary.data.LocationCache
+import eu.kastroguru.astrodiary.data.SelectedChartStore
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.db.entity.HistoryEventEntity
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
+import eu.kastroguru.astrodiary.data.network.geocodingMessage
+import eu.kastroguru.astrodiary.data.network.searchPlaces
 import eu.kastroguru.astrodiary.data.network.NominatimResult
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import eu.kastroguru.astrodiary.data.repository.HistoryEventRepository
@@ -46,7 +51,9 @@ class EventViewModel @Inject constructor(
     private val repository: HistoryEventRepository,
     private val birthDataRepository: BirthDataRepository,
     private val geocodingApi: GeocodingApi,
-    private val locationCache: LocationCache
+    private val locationCache: LocationCache,
+    private val selectedChartStore: SelectedChartStore,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<EventUiState>(EventUiState.Loading)
@@ -68,10 +75,25 @@ class EventViewModel @Inject constructor(
     private val _availablePersons = MutableStateFlow<List<BirthDataEntity>>(emptyList())
     val availablePersons: StateFlow<List<BirthDataEntity>> = _availablePersons.asStateFlow()
 
+    // "All persons" is an explicit user override: while it is on, the gallery ignores the app-wide
+    // selection instead of snapping back to a single person.
+    private var showAllPersonsOverride = false
+
     init {
         loadAll()
         watchMetadata()
         watchPersons()
+        followSelectedChart()
+    }
+
+    /** The gallery shows the app-wide selected person (see SelectedChartStore) unless "all" is chosen. */
+    private fun followSelectedChart() {
+        viewModelScope.launch {
+            selectedChartStore.selectedId.collect { id ->
+                if (id == null || showAllPersonsOverride) return@collect
+                if (_filter.value.personId != id) applyPersonFilter(id)
+            }
+        }
     }
 
     private fun watchPersons() {
@@ -112,9 +134,24 @@ class EventViewModel @Inject constructor(
     private fun tagsOf(e: HistoryEventEntity): List<String> =
         e.tags.split(",").map { it.trim() }.filter { it.isNotBlank() }
 
-    fun clearFilter() { _filter.value = EventFilter() }
-    /** Selecting a person resets tags, since the available tag set changes with the person. */
-    fun setPersonFilter(personId: Long?) { _filter.value = _filter.value.copy(personId = personId, tags = emptySet()) }
+    fun clearFilter() {
+        showAllPersonsOverride = true
+        _filter.value = EventFilter()
+    }
+
+    /**
+     * Selecting a person resets tags, since the available tag set changes with the person, and makes
+     * that person the app-wide selection so the chart/transit/Human-Design screens follow along.
+     */
+    fun setPersonFilter(personId: Long?) {
+        showAllPersonsOverride = personId == null
+        if (personId != null) selectedChartStore.select(personId)
+        applyPersonFilter(personId)
+    }
+
+    private fun applyPersonFilter(personId: Long?) {
+        _filter.value = _filter.value.copy(personId = personId, tags = emptySet())
+    }
     fun setTags(tags: Set<String>) { _filter.value = _filter.value.copy(tags = tags) }
     fun setSortOrder(order: EventSortOrder) { _filter.value = _filter.value.copy(sortOrder = order) }
 
@@ -143,16 +180,17 @@ class EventViewModel @Inject constructor(
                 if (cached != null) {
                     val fakeResult = NominatimResult(
                         lat = cached.lat.toString(), lon = cached.lon.toString(),
-                        displayName = "$city, $country (cached)",
+                        displayName = listOf(city, country).filter { it.isNotBlank() }
+                            .joinToString(", ") + " (cached)",
                         address = null
                     )
                     _formState.value = EventFormState.GeocodingResults(listOf(fakeResult))
                 } else {
                     val query = if (country.isNotBlank()) "$city, $country" else city
-                    _formState.value = EventFormState.GeocodingResults(geocodingApi.search(query))
+                    _formState.value = EventFormState.GeocodingResults(geocodingApi.searchPlaces(query))
                 }
             } catch (e: Exception) {
-                _formState.value = EventFormState.Error(e.message ?: "Geocoding failed")
+                _formState.value = EventFormState.Error(e.geocodingMessage(context))
             }
         }
     }

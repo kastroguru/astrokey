@@ -1,10 +1,9 @@
 package eu.kastroguru.astrodiary.ui.humandesign
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.kastroguru.astrodiary.data.SelectedChartStore
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import eu.kastroguru.astrodiary.domain.humandesign.HumanDesignCalculator
@@ -13,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -29,29 +29,28 @@ data class HumanDesignUiState(
 class HumanDesignViewModel @Inject constructor(
     private val repository: BirthDataRepository,
     private val hdCalculator: HumanDesignCalculator,
-    @ApplicationContext private val context: Context
+    private val selectedChartStore: SelectedChartStore,
 ) : ViewModel() {
-
-    private val prefs = context.getSharedPreferences("human_design_prefs", Context.MODE_PRIVATE)
 
     private val _state = MutableStateFlow(HumanDesignUiState())
     val state: StateFlow<HumanDesignUiState> = _state.asStateFlow()
 
     init {
+        // Same app-wide selection as the natal-chart and transit screens (see SelectedChartStore).
         viewModelScope.launch {
-            repository.getAll().collect { list ->
-                _state.value = _state.value.copy(allBirthData = list)
-                if (_state.value.selected == null && list.isNotEmpty()) {
-                    val lastId = prefs.getLong("last_hd_id", -1L)
-                    val toSelect = if (lastId >= 0) list.find { it.id == lastId } else null
-                    select(toSelect ?: list[0])
+            combine(repository.getAll(), selectedChartStore.selectedId) { list, id -> list to id }
+                .collect { (list, id) ->
+                    _state.value = _state.value.copy(allBirthData = list)
+                    if (list.isEmpty()) return@collect
+                    val wanted = list.find { it.id == id } ?: list.first()
+                    if (_state.value.selected?.id != wanted.id || _state.value.chart == null) select(wanted)
+                    if (wanted.id != id) selectedChartStore.select(wanted.id)
                 }
-            }
         }
     }
 
     fun select(entity: BirthDataEntity) {
-        prefs.edit().putLong("last_hd_id", entity.id).apply()
+        selectedChartStore.select(entity.id)
         _state.value = _state.value.copy(selected = entity, isLoading = true, error = null)
         viewModelScope.launch {
             try {

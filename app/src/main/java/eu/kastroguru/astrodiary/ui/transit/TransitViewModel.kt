@@ -8,10 +8,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.data.AspectPrefs
 import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
+import eu.kastroguru.astrodiary.data.SelectedChartStore
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.calculator.PrimaryDirectionsCalculator
+import eu.kastroguru.astrodiary.domain.calculator.TransitTimeline
 import eu.kastroguru.astrodiary.domain.model.AstroData
 import eu.kastroguru.astrodiary.domain.model.Planet
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +25,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -87,10 +90,9 @@ class TransitViewModel @Inject constructor(
     private val calculator: AstroCalculator,
     private val aspectPrefs: AspectPrefs,
     private val chartDisplayPrefs: ChartDisplayPrefs,
+    private val selectedChartStore: SelectedChartStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-
-    private val prefs = context.getSharedPreferences("transit_prefs", Context.MODE_PRIVATE)
 
     private val _state = MutableStateFlow(TransitUiState())
     val state: StateFlow<TransitUiState> = _state.asStateFlow()
@@ -127,21 +129,26 @@ class TransitViewModel @Inject constructor(
         "${natal.id}:${natal.yearUtc}-${natal.monthUtc}-${natal.dayUtc}-${natal.hourUtc}-${natal.minutesUtc}:${natal.latitude},${natal.longitude}"
 
     init {
+        // Follow the app-wide selected chart, so the person picked on any other screen is already
+        // selected here. Falls back to the first chart when the selection is empty or was deleted.
         viewModelScope.launch {
-            repository.getAll().collect { list ->
-                _state.value = _state.value.copy(allBirthData = list)
-                if (_state.value.natalData == null && list.isNotEmpty()) {
-                    // Restore last-used natal chart; fall back to first if not found
-                    val lastId = prefs.getLong("last_natal_id", -1L)
-                    val toSelect = if (lastId >= 0) list.find { it.id == lastId } else null
-                    selectNatal(toSelect ?: list[0])
+            combine(repository.getAll(), selectedChartStore.selectedId) { list, id -> list to id }
+                .collect { (list, id) ->
+                    _state.value = _state.value.copy(allBirthData = list)
+                    if (list.isEmpty()) return@collect
+                    val wanted = list.find { it.id == id } ?: list.first()
+                    if (_state.value.natalData?.id != wanted.id) {
+                        _state.value = _state.value.copy(natalData = wanted)
+                        calculate()
+                    }
+                    if (wanted.id != id) selectedChartStore.select(wanted.id)
                 }
-            }
         }
     }
 
     fun selectNatal(entity: BirthDataEntity) {
-        prefs.edit().putLong("last_natal_id", entity.id).apply()  // persist choice
+        selectedChartStore.select(entity.id)          // every screen follows this choice
+        if (_state.value.natalData?.id == entity.id) return
         _state.value = _state.value.copy(natalData = entity)
         calculate()
     }
@@ -326,10 +333,11 @@ class TransitViewModel @Inject constructor(
     // ── Aspect calculation ────────────────────────────────────────────────────
     private fun calculateAspects(transit: AstroData, natal: BirthDataEntity): List<TransitAspect> {
         val natalPlanets = extractNatalPlanets(natal)
+        val orb = TransitTimeline.TRANSIT_ORB_DEG      // same orb the aspect timeline scans with
         val aspectDefs = listOf(
-            Triple(0, "Conjunction", 2.0), Triple(60, "Sextile", 2.0),
-            Triple(90, "Square", 2.0),    Triple(120, "Trine", 2.0),
-            Triple(150, "Quincunx", 2.0), Triple(180, "Opposition", 2.0)
+            Triple(0, "Conjunction", orb), Triple(60, "Sextile", orb),
+            Triple(90, "Square", orb),    Triple(120, "Trine", orb),
+            Triple(150, "Quincunx", orb), Triple(180, "Opposition", orb)
         )
         // Mirror all filters from the chart view so the list stays in sync
         val aspectPrefs = context.getSharedPreferences("aspect_settings", Context.MODE_PRIVATE)

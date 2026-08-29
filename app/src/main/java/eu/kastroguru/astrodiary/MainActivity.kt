@@ -18,11 +18,18 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import eu.kastroguru.astrodiary.databinding.ActivityMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import eu.kastroguru.astrodiary.data.ReadingMode
+import eu.kastroguru.astrodiary.data.ReadingModeStore
+import eu.kastroguru.astrodiary.ui.help.ScreenHelp
 import eu.kastroguru.astrodiary.ui.legal.LegalFragment
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject lateinit var readingModeStore: ReadingModeStore
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -60,7 +67,11 @@ class MainActivity : AppCompatActivity() {
 
         val graph = navController.navInflater.inflate(R.navigation.nav_graph)
         graph.setStartDestination(
-            if (languagePicked) R.id.birthDataListFragment else R.id.languagePickerFragment
+            when {
+                !languagePicked -> R.id.languagePickerFragment
+                !readingModeStore.isChosen -> R.id.readingModePickerFragment
+                else -> R.id.birthDataListFragment
+            }
         )
         navController.setGraph(graph, null)
 
@@ -77,19 +88,122 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.bottomNavigation.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            val isPickerScreen = destination.id == R.id.languagePickerFragment
+        // The transits tab leads somewhere different in plain mode: today's contacts in words, with
+        // no date controls, because moving the date means nothing to someone who does not read charts.
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (item.itemId == R.id.transitFragment && readingModeStore.current == ReadingMode.PLAIN) {
+                if (navController.currentDestination?.id != R.id.transitReadingFragment) {
+                    navController.navigate(R.id.transitReadingFragment)
+                }
+                true
+            } else {
+                androidx.navigation.ui.NavigationUI.onNavDestinationSelected(item, navController)
+            }
+        }
+
+        navController.addOnDestinationChangedListener { _, destination, arguments ->
+            val isPickerScreen = destination.id == R.id.languagePickerFragment ||
+                destination.id == R.id.readingModePickerFragment
             binding.toolbar.visibility = if (isPickerScreen) View.GONE else View.VISIBLE
             binding.bottomNavigation.visibility = if (isPickerScreen) View.GONE else View.VISIBLE
+
+            // The "?" belongs to the screen, not to the activity: look its explanation up here so
+            // every destination gets one without having to remember anything in the fragment.
+            // The wheel button belongs to the reading screen: that is the one place where the chart
+            // is deliberately not on screen.
+            val birthId = arguments?.getLong("birthDataId")?.takeIf { it != 0L }
+            val eventId = arguments?.getLong("eventId")?.takeIf { it != 0L }
+            when (destination.id) {
+                R.id.chartReadingFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel
+                    chartToggleAction = birthId?.let {
+                        { navController.navigate(R.id.chartFragment, bundleOf("birthDataId" to it)) }
+                    }
+                }
+                R.id.transitReadingFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel
+                    chartToggleAction = { navController.navigate(R.id.transitFragment) }
+                    binding.bottomNavigation.menu.findItem(R.id.transitFragment)?.isChecked = true
+                }
+                R.id.chartFragment, R.id.planetTableFragment, R.id.birthDataDetailFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel_off
+                    chartToggleAction = birthId?.let {
+                        { navController.navigate(R.id.chartReadingFragment, bundleOf("birthDataId" to it)) }
+                    }
+                }
+                R.id.transitFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel_off
+                    chartToggleAction = { navController.navigate(R.id.transitReadingFragment) }
+                }
+                // Events have the same pair: the entry as it reads, and the chart behind it.
+                R.id.eventDetailFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel
+                    chartToggleAction = eventId?.let {
+                        { navController.navigate(R.id.eventChartFragment, bundleOf("eventId" to it)) }
+                    }
+                }
+                R.id.eventChartFragment, R.id.eventPlanetTableFragment -> {
+                    chartToggleIcon = R.drawable.ic_chart_wheel_off
+                    chartToggleAction = eventId?.let {
+                        { navController.navigate(R.id.eventDetailFragment, bundleOf("eventId" to it)) }
+                    }
+                }
+                else -> {
+                    chartToggleIcon = null
+                    chartToggleAction = null
+                }
+            }
+
+            helpTextRes = ScreenHelp.forDestination(destination.id)
+            helpScreenTitle = destination.label?.toString().orEmpty()
+            invalidateOptionsMenu()
         }
     }
+
+    /** Explanation of the screen currently on top, or null for screens without a title. */
+    private var helpTextRes: Int? = null
+    /** Chart to open from the toolbar, when the screen on top is a reading of one. */
+    /**
+     * The chart button is a two-way switch, not a one-way door: a wheel on the plain screens (tap to
+     * see the chart) and a struck-through wheel on the astrologer's screens (tap to leave it).
+     */
+    private var chartToggleIcon: Int? = null
+    private var chartToggleAction: (() -> Unit)? = null
+    private var helpScreenTitle: String = ""
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_help)?.isVisible = helpTextRes != null
+        menu.findItem(R.id.action_chart)?.apply {
+            isVisible = chartToggleAction != null
+            chartToggleIcon?.let { setIcon(it) }
+            setTitle(if (chartToggleIcon == R.drawable.ic_chart_wheel_off) R.string.show_reading else R.string.show_chart)
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun showScreenHelp() {
+        val textRes = helpTextRes ?: return
+        MaterialAlertDialogBuilder(this)
+            .setTitle(helpScreenTitle.ifBlank { getString(R.string.help_title) })
+            .setMessage(textRes)
+            .setPositiveButton(R.string.help_got_it, null)
+            .show()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_chart) {
+            chartToggleAction?.invoke()
+            return true
+        }
+        if (item.itemId == R.id.action_help) {
+            showScreenHelp()
+            return true
+        }
         if (item.itemId == R.id.action_burger) {
             val anchor = binding.toolbar.findViewById<View>(R.id.action_burger) ?: binding.toolbar
             val popup = PopupMenu(this, anchor)

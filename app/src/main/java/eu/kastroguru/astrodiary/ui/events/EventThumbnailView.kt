@@ -26,6 +26,8 @@ class EventThumbnailView @JvmOverloads constructor(
         val glyphA: String, val colorA: Int,
         val glyphB: String, val colorB: Int,
         val aspectSymbol: String, val aspectColor: Int,
+        /** The aspect in words ("тригон"), so the cell reads without knowing the glyphs. */
+        val aspectLabel: String,
         val sunSign: String, val sunColor: Int,
         val moonSign: String, val moonColor: Int,
         val city: String, val datetime: String,
@@ -63,7 +65,12 @@ class EventThumbnailView @JvmOverloads constructor(
             bgPaint.color = (d.aspectColor and 0x00FFFFFF) or 0x14000000
             canvas.drawRect(0f, 0f, w, h, bgPaint)
 
+            // A side "glyph" can be the word "Asc"/"MC" instead of a single symbol, which is ~3x
+            // wider and used to be clipped at the cell edge — shrink the row until both sides fit.
             glyphPaint.textSize = w * 0.26f
+            val heroBudget = w * 0.40f
+            val widest = max(glyphPaint.measureText(d.glyphA), glyphPaint.measureText(d.glyphB))
+            if (widest > heroBudget) glyphPaint.textSize = w * 0.26f * (heroBudget / widest)
             val heroY = h * 0.30f - (glyphPaint.descent() + glyphPaint.ascent()) / 2f
             val gap = w * 0.28f
             glyphPaint.color = d.colorA
@@ -73,6 +80,10 @@ class EventThumbnailView @JvmOverloads constructor(
             glyphPaint.color = d.aspectColor
             glyphPaint.textSize = w * 0.17f
             canvas.drawText(d.aspectSymbol, w / 2f, h * 0.30f - (glyphPaint.descent() + glyphPaint.ascent()) / 2f, glyphPaint)
+
+            // …and the same thing in words underneath, for everyone who does not read glyphs.
+            glyphPaint.textSize = w * 0.10f
+            canvas.drawText(ellipsize(d.aspectLabel, glyphPaint, w * 0.92f), w / 2f, h * 0.50f, glyphPaint)
         }
 
         // ── Bottom info band (≤ 1/3 of the cell), on a dark scrim for legibility over photos ──

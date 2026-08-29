@@ -11,6 +11,25 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- The wheel is the first thing on the screen, so opening a chart from the list shows
+             the same thing as saving a new one. Tapping it opens the full chart screen. -->
+        <com.google.android.material.card.MaterialCardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@color/surface_dark"
+            app:cardCornerRadius="12dp">
+
+            <eu.kastroguru.astrodiary.ui.chart.AstroChartView
+                android:id="@+id/chartPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.card.MaterialCardView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
@@ -101,6 +120,14 @@
                 android:text="@string/view_table" />
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonReading"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/show_reading" />
 
         <com.google.android.material.card.MaterialCardView
             xmlns:app="http://schemas.android.com/apk/res-auto"

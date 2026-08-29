@@ -2,10 +2,14 @@ package eu.kastroguru.astrodiary.ui.birthdata
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.LocationCache
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
+import eu.kastroguru.astrodiary.data.network.geocodingMessage
+import eu.kastroguru.astrodiary.data.network.searchPlaces
 import eu.kastroguru.astrodiary.data.network.NominatimResult
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import kotlinx.coroutines.flow.*
@@ -30,7 +34,8 @@ sealed class FormState {
 class BirthDataViewModel @Inject constructor(
     private val repository: BirthDataRepository,
     private val geocodingApi: GeocodingApi,
-    private val locationCache: LocationCache
+    private val locationCache: LocationCache,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<BirthDataUiState>(BirthDataUiState.Loading)
@@ -75,17 +80,21 @@ class BirthDataViewModel @Inject constructor(
                 val cached = locationCache.get(city, country)
                 if (cached != null) {
                     _formState.value = FormState.GeocodingResults(listOf(
-                        NominatimResult(cached.lat.toString(), cached.lon.toString(), "$city, $country (cached)")
+                        NominatimResult(cached.lat.toString(), cached.lon.toString(), cachedLabel(city, country))
                     ))
                 } else {
                     val query = if (country.isNotBlank()) "$city, $country" else city
-                    _formState.value = FormState.GeocodingResults(geocodingApi.search(query))
+                    _formState.value = FormState.GeocodingResults(geocodingApi.searchPlaces(query))
                 }
             } catch (e: Exception) {
-                _formState.value = FormState.Error(e.message ?: "Geocoding failed")
+                _formState.value = FormState.Error(e.geocodingMessage(context))
             }
         }
     }
+
+    /** Label for a cache hit — country is optional, so it must not leave a dangling comma. */
+    private fun cachedLabel(city: String, country: String) =
+        listOf(city, country).filter { it.isNotBlank() }.joinToString(", ") + " (cached)"
 
     fun cacheLocation(city: String, country: String, lat: Double, lon: Double, tz: String) =
         locationCache.put(city, country, lat, lon, tz)

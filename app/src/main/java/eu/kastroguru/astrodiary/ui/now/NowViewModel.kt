@@ -10,6 +10,8 @@ import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.data.ChartDisplayPrefs
 import eu.kastroguru.astrodiary.data.LocationCache
 import eu.kastroguru.astrodiary.data.network.GeocodingApi
+import eu.kastroguru.astrodiary.data.network.geocodingMessage
+import eu.kastroguru.astrodiary.data.network.searchPlaces
 import eu.kastroguru.astrodiary.data.network.NominatimResult
 import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.model.AstroData
@@ -142,7 +144,7 @@ class NowViewModel @Inject constructor(
                         if (_state.value.isLive) context.getString(R.string.now_live_label) else ""
                 _state.value = _state.value.copy(astroData = data, isLoading = false, dateLabel = label)
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = e.message)
+                _state.value = _state.value.copy(isLoading = false, error = e.geocodingMessage(context))
             }
         }
     }
@@ -159,7 +161,7 @@ class NowViewModel @Inject constructor(
                 } else {
                     val q = if (country.isNotBlank()) "$city, $country" else city
                     _state.value = _state.value.copy(
-                        isLoading = false, geocodingResults = geocodingApi.search(q)
+                        isLoading = false, geocodingResults = geocodingApi.searchPlaces(q)
                     )
                 }
             } catch (e: Exception) {

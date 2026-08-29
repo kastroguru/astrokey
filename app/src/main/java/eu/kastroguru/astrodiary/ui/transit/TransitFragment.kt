@@ -65,7 +65,8 @@ class TransitFragment : Fragment() {
                     "natalDataId"      to (state.natalData?.id ?: 0L),
                     "transitMs"        to viewModel.transitMs,
                     "isPd"             to !aspect.directedLon.isNaN(),
-                    "directedLon"      to if (aspect.directedLon.isNaN()) -1f else aspect.directedLon.toFloat()
+                    "directedLon"      to if (aspect.directedLon.isNaN()) -1f else aspect.directedLon.toFloat(),
+                    "aspectDeg"        to aspect.exactDegree
                 )
             )
         }

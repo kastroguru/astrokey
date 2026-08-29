@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- The chart wheel, struck through: tapping it leaves the chart behind. -->
+    <path
+        android:fillColor="@color/text_primary"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8s3.59,-8 8,-8 8,3.59 8,8 -3.59,8 -8,8z" />
+    <path
+        android:fillColor="@color/text_primary"
+        android:pathData="M12,6.5c-3.04,0 -5.5,2.46 -5.5,5.5s2.46,5.5 5.5,5.5 5.5,-2.46 5.5,-5.5 -2.46,-5.5 -5.5,-5.5zM12,16c-2.21,0 -4,-1.79 -4,-4s1.79,-4 4,-4 4,1.79 4,4 -1.79,4 -4,4z" />
+    <path
+        android:fillColor="@color/text_primary"
+        android:pathData="M11.25,2.5h1.5v4h-1.5zM11.25,17.5h1.5v4h-1.5zM2.5,11.25h4v1.5h-4zM17.5,11.25h4v1.5h-4z" />
+    <path
+        android:fillColor="@color/text_primary"
+        android:pathData="M4.4,3.1l16.5,16.5l-1.3,1.3l-16.5,-16.5z" />
+</vector>

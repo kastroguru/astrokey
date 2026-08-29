@@ -269,4 +269,93 @@
     <string name="filter_all_persons">All people</string>
     <string name="filter_no_tags">No tags</string>
     <string name="filter_no_tags_available">No tags yet</string>
+
+    <!-- Aspect timing (when a transit starts, perfects and fades) -->
+    <string name="aspect_tap_hint">Tap an aspect to see what it means and when it is active.</string>
+    <string name="aspect_window_calculating">Working out the dates…</string>
+    <string name="aspect_window_title">When it is active</string>
+    <string name="aspect_window_range">Active from %1$s to %2$s</string>
+    <string name="aspect_window_until">Active until %1$s</string>
+    <string name="aspect_window_from">Active since %1$s</string>
+    <string name="aspect_window_long">Active longer than the period checked</string>
+    <string name="aspect_exact_one">Exact on %1$s</string>
+    <string name="aspect_exact_many">Exact %1$d times: %2$s</string>
+    <string name="aspect_exact_none">It never becomes exact — the planet comes close and pulls away again.</string>
+    <string name="aspect_retrograde_note">The planet passes this point more than once: it turns retrograde in between, so the same theme comes back and is worked through again.</string>
+
+    <!-- Plain-language reading of an event's tightest aspect -->
+    <string name="point_asc">Ascendant</string>
+    <string name="point_mc">Midheaven</string>
+    <string name="event_sky_title">The sky at that moment</string>
+    <string name="event_sky_line">%1$s %2$s %3$s</string>
+    <string name="event_sky_exactness">exact to %1$s°</string>
+    <string name="aspect_meaning_0">The two forces act as one and reinforce each other — a strong, single push in the same direction.</string>
+    <string name="aspect_meaning_60">An easy, supportive link: an opportunity that opens up if you take the first step.</string>
+    <string name="aspect_meaning_90">Tension that pushes you to act — things move, but through friction and effort.</string>
+    <string name="aspect_meaning_120">A natural flow between the two forces: it works almost by itself.</string>
+    <string name="aspect_meaning_150">The two forces do not fit together — it asks for adjustment and a different angle.</string>
+    <string name="aspect_meaning_180">The two forces face each other — the task is to find the balance between two extremes.</string>
+
+    <!-- Why a city search failed -->
+    <string name="error_geocoding_busy">The city lookup service is refusing requests right now. Please try again in a minute.</string>
+    <string name="error_geocoding_offline">No connection. Searching for a city needs the internet — everything else works offline.</string>
+    <string name="error_geocoding_failed">The city search did not go through. Please try again.</string>
+
+    <!-- The "?" in the toolbar: what each screen is for -->
+    <string name="help_title">What is this screen?</string>
+    <string name="help_got_it">Got it</string>
+    <string name="help_birth_data_list">The people whose charts you keep. Tap + to add someone — you can keep as many as you like, for yourself, your family or your clients. Tap a person to open their chart. Whoever you pick here stays selected on the other screens too.</string>
+    <string name="help_birth_data_form">Enter the date, the time and the place of birth. The time matters: it decides the Ascendant and the houses, so an hour off changes the chart. Type the city and tap Search — that fills in the coordinates and the time zone for you.</string>
+    <string name="help_birth_data_detail">The chart wheel for this person, with the birth data underneath. "House cusps" are the boundaries of the twelve houses — the areas of life the chart is divided into. Tap the wheel, or Chart, to open it full screen.</string>
+    <string name="help_chart">The wheel of the sky at that moment. The coloured ring on the outside holds the twelve signs; the numbered slices inside are the houses; the symbols are the planets, placed where they were. The lines across the middle are aspects — the angles between planets. The table underneath says the same thing in numbers.</string>
+    <string name="help_planet_table">Where every planet stood: its sign, its exact degree, and the house it fell in. "Dign." is dignity — whether a planet is comfortable in that sign. The grid at the bottom shows which planets form aspects to each other.</string>
+    <string name="help_event_list">Your diary. Every event you record keeps the sky of that moment, so you can look back and see what was happening above. Each cell shows the closest aspect at that time — or your own photo if you added one — with the sun sign, moon sign, place and date underneath. Use the two dropdowns to narrow the list down to one person or one tag.</string>
+    <string name="help_event_form">Record something that happened: what, when and where. Attaching it to a person links it to their chart; a photo replaces the generated artwork in the gallery. Tags are your own words, separated by commas.</string>
+    <string name="help_event_detail">Everything you saved about this event, plus what the sky was doing at that moment, said in words. Chart and Table open the full chart for that exact time.</string>
+    <string name="help_now">The sky right now, over the place you set. Use the arrows to step forward or backward in time — by hour, day or week — and the "now" button to come back to the present moment.</string>
+    <string name="help_transits">Where the planets are today compared with the birth chart you pick at the top. The list underneath shows the aspects that are active now, with how exact each one is and whether it is still building or already fading. Tap any row for the full explanation and its dates. The dropdown also switches to primary directions, a slower technique that moves the whole chart forward through life.</string>
+    <string name="help_aspect_detail">What this particular meeting between two planets means, and when it matters: the day it comes into range, the day it is exact, and the day it fades. Outer planets often perfect the same aspect three times, because they turn back over the same degree — when that happens, the theme returns.</string>
+    <string name="help_human_design">The bodygraph, built from the same birth data. The shapes are centres, the lines between them are channels. Underneath is the summary: type, strategy, authority, profile and definition.</string>
+    <string name="help_settings">Language, the house system used to divide the chart, which bodies count when aspects are calculated, and importing charts you already have from astro.com.</string>
+
+    <string name="aspect_graph_title">How strong it is, over time</string>
+    <string name="aspect_graph_now">now</string>
+    <string name="aspect_graph_caption">1 is exact, 0 is out of range. Separate humps are separate spells of activity — a slow planet can leave and come back months later, going retrograde over the same degree.</string>
+
+    <!-- First run: how much astrology to show -->
+    <string name="mode_question">Do you read astrology charts?</string>
+    <string name="mode_question_hint">This only decides what each screen opens with. Nothing is hidden either way.</string>
+    <string name="mode_plain_answer">No — explain it in words</string>
+    <string name="mode_plain_desc">Each screen starts with what it means, written plainly. The chart itself is one tap away whenever you want it.</string>
+    <string name="mode_astrologer_answer">Yes — show me the chart</string>
+    <string name="mode_astrologer_desc">Wheel, table, orbs and dignities first, as they are now. The plain-language readings are one tap away.</string>
+    <string name="mode_changeable_later">You can change this at any time in Settings.</string>
+    <string name="mode_setting_title">What each screen opens with</string>
+    <string name="mode_plain_short">In plain words</string>
+    <string name="mode_astrologer_short">Astrologer</string>
+    <string name="show_chart">Show the chart</string>
+    <string name="show_reading">What it means</string>
+
+    <!-- The chart, read as words -->
+    <string name="reading_title">What the chart says</string>
+    <string name="reading_born_line">Born %1$s at %2$s, %3$s</string>
+    <string name="reading_group_who">Who you are</string>
+    <string name="reading_group_world">How it plays out</string>
+    <string name="reading_in_sign">%1$s in %2$s</string>
+    <string name="reading_in_house">house %1$d</string>
+    <string name="reading_ruler_in_house">ruler %1$s in house %2$d</string>
+    <string name="help_chart_reading">The whole chart said in words. First the placements people recognise themselves in — Sun, Moon and Ascendant — and then each planet in turn: what it does, which part of life it works in, and where that part is actually decided. Tap the wheel icon in the bar above to see the chart itself.</string>
+
+    <!-- Current transits, in words -->
+    <string name="transit_reading_title">What is affecting you</string>
+    <string name="transit_reading_today">Today, %1$s</string>
+    <string name="transit_reading_heading_m">%1$s %2$s your %3$s</string>
+    <string name="transit_reading_heading_f">%1$s %2$s your %3$s</string>
+    <string name="transit_reading_heading_n">%1$s %2$s your %3$s</string>
+    <string name="transit_reading_building">building up</string>
+    <string name="transit_reading_fading">fading</string>
+    <string name="transit_reading_tap_for_dates">Tap to see when it started, when it is exact and when it fades.</string>
+    <string name="transit_reading_none">Nothing is close enough to count right now. Come back in a few days.</string>
+    <string name="transit_reading_no_text">These two are in contact right now.</string>
+    <string name="help_transit_reading">What the sky is doing to the chosen person\'s chart today, strongest first. There is nothing to set here on purpose — these are simply the contacts that are active now. Tap one to see when it began, when it is exact and when it fades. The full transit screen, with the aspectarian and the date controls, is behind the wheel icon above.</string>
 </resources>
