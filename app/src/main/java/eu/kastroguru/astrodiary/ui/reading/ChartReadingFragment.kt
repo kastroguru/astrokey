@@ -57,9 +57,15 @@ class ChartReadingFragment : Fragment() {
         }
     }
 
+    /** The one open body, so the screen never turns into a wall of text again. */
+    private var openBody: View? = null
+    private var openArrow: TextView? = null
+
     private fun render(sections: List<ChartReadingViewModel.Section>) {
         val box = binding.container
         box.removeAllViews()
+        openBody = null
+        openArrow = null
         val bulgarian = AppCompatDelegate.getApplicationLocales().toLanguageTags().startsWith("bg")
 
         var lastKind: ChartReadingViewModel.Section.Kind? = null
@@ -71,11 +77,11 @@ class ChartReadingFragment : Fragment() {
                 ))
                 lastKind = section.kind
             }
-            box.addView(card(headingFor(section), if (bulgarian) section.text.bg else section.text.en))
+            box.addView(collapsible(headingFor(section), if (bulgarian) section.text.bg else section.text.en))
         }
     }
 
-    /** "Слънце в Телец · 5 дом · владетелят е в 9 дом" — the names live here, not in the texts. */
+    /** "Слънце в Телец · 12 дом · владетелят Венера е в 11 дом" — the names live here, not in the texts. */
     private fun headingFor(s: ChartReadingViewModel.Section): String {
         val ctx = requireContext()
         val subject = when (s.planetKey) {
@@ -102,31 +108,67 @@ class ChartReadingFragment : Fragment() {
         updatePadding(left = (4 * d).toInt(), top = (22 * d).toInt(), bottom = (6 * d).toInt())
     }
 
-    private fun card(heading: String, body: String): View {
+    /**
+     * A heading that opens its text when tapped. The readings run to a few hundred characters each,
+     * and thirteen of them stacked open made the screen unusable — so the list is the resting state.
+     */
+    private fun collapsible(heading: String, body: String): View {
         val ctx = requireContext()
         val d = resources.displayMetrics.density
-        val box = LinearLayout(ctx).apply {
+
+        val arrow = TextView(ctx).apply {
+            text = "▾"
+            setTextColor(ctx.getColor(R.color.text_secondary))
+            textSize = 14f
+        }
+        val title = TextView(ctx).apply {
+            text = heading
+            setTextColor(ctx.getColor(R.color.text_primary))
+            textSize = 15f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val row = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(title)
+            addView(arrow)
+        }
+        val text = TextView(ctx).apply {
+            this.text = body
+            setTextColor(ctx.getColor(R.color.text_secondary))
+            textSize = 15f
+            setLineSpacing(0f, 1.15f)
+            updatePadding(top = (10 * d).toInt())
+            visibility = View.GONE
+        }
+        val card = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_reading_card)
             updatePadding((14 * d).toInt(), (14 * d).toInt(), (14 * d).toInt(), (14 * d).toInt())
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = (8 * d).toInt() }
+            isClickable = true
+            addView(row)
+            addView(text)
+            setOnClickListener { toggle(text, arrow) }
         }
-        box.addView(TextView(ctx).apply {
-            text = heading
-            setTextColor(ctx.getColor(R.color.text_primary))
-            textSize = 15f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-        })
-        box.addView(TextView(ctx).apply {
-            text = body
-            setTextColor(ctx.getColor(R.color.text_secondary))
-            textSize = 15f
-            setLineSpacing(0f, 1.15f)
-            updatePadding(top = (8 * d).toInt())
-        })
-        return box
+        return card
+    }
+
+    private fun toggle(body: View, arrow: TextView) {
+        val wasOpen = body.visibility == View.VISIBLE
+        openBody?.visibility = View.GONE
+        openArrow?.text = "▾"
+        if (wasOpen) {
+            openBody = null
+            openArrow = null
+            return
+        }
+        body.visibility = View.VISIBLE
+        arrow.text = "▴"
+        openBody = body
+        openArrow = arrow
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

@@ -23,6 +23,17 @@ import eu.kastroguru.astrodiary.domain.model.ZodiacSign
  */
 object NatalInterpretations {
 
+    /**
+     * Ends a composed sentence without doubling punctuation. The block texts are edited by hand and
+     * some of them are full sentences that already end in a full stop, so a template that always
+     * appends one produces "…тон на гласа..".
+     */
+    private fun stop(text: String): String {
+        val t = text.trimEnd()
+        return if (t.endsWith(".") || t.endsWith("!") || t.endsWith("?") || t.endsWith("…")) t else "$t."
+    }
+
+
     /** Hand-written planet-in-sign texts, key "sun_aries". Filled in batches; composition covers the rest. */
     internal val writtenPlanetInSign: Map<String, Bilingual> = SunInSign.entries + MoonInSign.entries
 
@@ -43,8 +54,8 @@ object NatalInterpretations {
         val planet = PlanetMeanings.of(planetKey) ?: return null
         val style = SignMeanings.of(sign) ?: return null
         return t(
-            "${planet.en}\n\nHere it does that ${style.en}.",
-            "${planet.bg}\n\nТук го прави ${style.bg}."
+            "${planet.en}\n\nHere it does that ${stop(style.en)}",
+            "${planet.bg}\n\nТук го прави ${stop(style.bg)}"
         )
     }
 
@@ -53,8 +64,8 @@ object NatalInterpretations {
         val planet = PlanetMeanings.of(planetKey) ?: return null
         val area = HouseMeanings.of(house) ?: return null
         return t(
-            "${planet.en}\n\nWhere it plays out: ${area.en}.",
-            "${planet.bg}\n\nРазиграва се тук: ${area.bg}."
+            "${planet.en}\n\nWhere it plays out: ${stop(area.en)}",
+            "${planet.bg}\n\nРазиграва се тук: ${stop(area.bg)}"
         )
     }
 
@@ -67,8 +78,8 @@ object NatalInterpretations {
         val angle = AngleMeanings.of(angleKey) ?: return null
         val style = SignMeanings.of(sign) ?: return null
         return t(
-            "${angle.en}\n\nHere that happens ${style.en}.",
-            "${angle.bg}\n\nТук това става ${style.bg}."
+            "${angle.en}\n\nHere that happens ${stop(style.en)}",
+            "${angle.bg}\n\nТук това става ${stop(style.bg)}"
         )
     }
 
@@ -87,8 +98,8 @@ object NatalInterpretations {
         val head = PlanetInHouseLines.of(link.planetKey, link.houseOfPlanet) ?: run {
             val planet = PlanetMeanings.of(link.planetKey) ?: return null
             val here = HouseMeanings.of(link.houseOfPlanet) ?: return null
-            t("${planet.en}\n\nWhere it plays out: ${here.en}.",
-              "${planet.bg}\n\nРазиграва се тук: ${here.bg}.")
+            t("${planet.en}\n\nWhere it plays out: ${stop(here.en)}",
+              "${planet.bg}\n\nРазиграва се тук: ${stop(here.bg)}")
         }
 
         // Second half: where it is actually decided.
@@ -103,8 +114,8 @@ object NatalInterpretations {
             )
             else -> RulerHouseKey.of(link.houseOfRuler) ?: run {
                 val thereShort = HouseMeanings.shortOf(link.houseOfRuler) ?: return null
-                t("It is not decided there, though. The key is ${thereShort.en}.",
-                  "Но не се решава там. Ключът е в ${thereShort.bg}.")
+                t("It is not decided there, though. The key is ${stop(thereShort.en)}",
+                  "Но не се решава там. Ключът е в ${stop(thereShort.bg)}")
             }
         }
         return t("${head.en}\n\n${tail.en}", "${head.bg}\n\n${tail.bg}")
@@ -117,13 +128,13 @@ object NatalInterpretations {
         val toShort = HouseMeanings.shortOf(inHouse) ?: return null
         if (ofHouse == inHouse) {
             return t(
-                "${ChartConcepts.houseRuler.en}\n\nHere the ruler stays at home. The area: ${from.en}. It is settled on its own terms, without depending on another part of life.",
-                "${ChartConcepts.houseRuler.bg}\n\nТук владетелят си остава у дома. Областта е тази: ${from.bg}. Решава се по свои правила, без да зависи от друга част от живота."
+                "${ChartConcepts.houseRuler.en}\n\nHere the ruler stays at home. The area: ${stop(from.en)} It is settled on its own terms, without depending on another part of life.",
+                "${ChartConcepts.houseRuler.bg}\n\nТук владетелят си остава у дома. Областта е тази: ${stop(from.bg)} Решава се по свои правила, без да зависи от друга част от живота."
             )
         }
         return t(
-            "${ChartConcepts.houseRuler.en}\n\nThe area: ${from.en}.\n\nIt is decided through ${toShort.en}.",
-            "${ChartConcepts.houseRuler.bg}\n\nОбластта е тази: ${from.bg}.\n\nРешава се през ${toShort.bg}."
+            "${ChartConcepts.houseRuler.en}\n\nThe area: ${stop(from.en)}\n\nIt is decided through ${stop(toShort.en)}",
+            "${ChartConcepts.houseRuler.bg}\n\nОбластта е тази: ${stop(from.bg)}\n\nРешава се през ${stop(toShort.bg)}"
         )
     }
 
@@ -132,8 +143,8 @@ object NatalInterpretations {
         val area = HouseMeanings.of(house) ?: return null
         val style = SignMeanings.of(sign) ?: return null
         return t(
-            "${ChartConcepts.interceptedHouse.en}\n\nHere that way of doing things — ${style.en} — reaches you only indirectly. The area: ${area.en}.",
-            "${ChartConcepts.interceptedHouse.bg}\n\nТук този начин на действие — ${style.bg} — ви стига само косвено. Областта е тази: ${area.bg}."
+            "${ChartConcepts.interceptedHouse.en}\n\nHere that way of doing things — ${style.en} — reaches you only indirectly. The area: ${stop(area.en)}",
+            "${ChartConcepts.interceptedHouse.bg}\n\nТук този начин на действие — ${style.bg} — ви стига само косвено. Областта е тази: ${stop(area.bg)}"
         )
     }
 

@@ -11,12 +11,12 @@ object AngleMeanings {
 
     val byKey: Map<String, Bilingual> = mapOf(
         "asc" to t(
-            "How you arrive: the impression people form in the first minute, the way you walk into a room, and the approach you reach for when something new starts. It is not a mask — it is the doorway to everything else in the chart, and it is built out of the moment and place you were born, not out of your intentions.",
-            "Как пристигате: впечатлението, което хората си съставят в първата минута, начинът, по който влизате в стая, и подходът, към който посягате, когато започва нещо ново. Не е маска — то е вратата към всичко останало в картата и е изградено от момента и мястото на раждането ви, не от намеренията ви."
+            "How you arrive: the Ascendant shows the first impression you give, the way you enter situations, and the approach you take when something begins. It isn’t a mask but the doorway through which the rest of the chart expresses itself — a pattern of bodily presence and instinctive responses shaped by the moment of birth. The ASC often reveals automatic habits you can become aware of and refine, so noticing it helps you choose when to lean into a first impulse or to adjust your presentation.",
+            "Как пристигате: Асцендентът показва първото впечатление, стила на влизане в нови ситуации и начина, по който започвате взаимодействия. Това не е маска, а начинът, по който тялото, поведението и моментът създават „вратата“ към останалата част от картата. Асцендентът може да обрисува повтарящи се реакции и автоматични подходи, които после съзнателно развивате или омекотявате; осъзнаването му често дава контрол върху първия импулс и позволява да подберете как да се представите според целта си."
         ),
         "mc" to t(
-            "The highest point of the chart: what you are known for, the direction your work pulls in, and the kind of authority you either answer to or grow into. It describes your standing in public rather than your private life — what strangers would say you are, and what you are aiming at.",
-            "Най-високата точка на картата: с какво сте известни, в каква посока тегли работата ви и какъв тип власт или зачитате, или се превръщате в нея. Описва мястото ви пред света, а не личния живот — какво биха казали за вас непознати и към какво сте се насочили."
+            "The chart’s highest point describes your standing before the world — reputation, vocation, or the public role you’re drawn toward. The Midheaven outlines the kinds of responsibilities, authority, or ambitions that shape your outward direction. It speaks more to public life than to private matters: the stage on which your work and status are seen. Life changes can shift how you express your MC, but understanding it helps you steer career choices and public behavior with greater clarity.",
+            "Най-високата точка на картата говори за позицията ви пред света — репутацията, кариерата или обществената роля, към която сте привлечени. Меридианът описва какво хората би трябвало да видят: типа отговорности, авторитет или амбиция, която ви тегли. Той не определя интимния живот, а сцената, на която се измерят вашите усилия. Животните обрати могат да изместят фокусa към или от МС, но разбирането му помага да насочвате професионални избори и публични прояви по-осъзнато."
         ),
     )
 

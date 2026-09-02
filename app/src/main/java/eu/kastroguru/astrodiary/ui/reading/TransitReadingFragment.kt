@@ -83,6 +83,8 @@ class TransitReadingFragment : Fragment() {
 
         val box = binding.container
         box.removeAllViews()
+        openBody = null
+        openArrow = null
         val bulgarian = AppCompatDelegate.getApplicationLocales().toLanguageTags().startsWith("bg")
         for (aspect in aspects) {
             box.addView(card(aspect, bulgarian, state))
@@ -112,7 +114,15 @@ class TransitReadingFragment : Fragment() {
         }
     }
 
-    /** "Сатурн · квадрат към твоята Луна · набира сила" plus what that contact is about. */
+    /** The one open body, so eight long readings cannot stack into a wall of text. */
+    private var openBody: View? = null
+    private var openArrow: TextView? = null
+
+    /**
+     * A heading that opens its reading when tapped: "Сатурн квадрат вашата Луна · набира сила".
+     * The dates line inside the opened text is what navigates on — tapping the heading only opens
+     * and closes, so a tap never takes you somewhere by surprise.
+     */
     private fun card(aspect: TransitAspect, bulgarian: Boolean, state: TransitUiState): View {
         val ctx = requireContext()
         val d = resources.displayMetrics.density
@@ -130,13 +140,43 @@ class TransitReadingFragment : Fragment() {
             if (aspect.isApplying) R.string.transit_reading_building else R.string.transit_reading_fading
         )
         val interpretation = TransitInterpretations.getGeneral(aspect.transitPlanet, aspect.natalPlanet)
-        // The stored texts open by naming the pair ("Транзитен Хирон към Натално Слънце: …"), which
-        // the heading above already says. Drop that lead-in rather than reprinting it.
-        val body = interpretation?.let { if (bulgarian) it.second else it.first }
+        // The stored texts open by naming the pair, which the heading already says. Drop that lead-in.
+        val bodyText = interpretation?.let { if (bulgarian) it.second else it.first }
             ?.replace(Regex("^(Транзит\\w*|Transit)[^:]{0,60}:\\s*"), "")
             ?: getString(R.string.transit_reading_no_text)
 
-        val box = LinearLayout(ctx).apply {
+        val arrow = TextView(ctx).apply {
+            text = "▾"
+            setTextColor(ctx.getColor(R.color.text_secondary))
+            textSize = 14f
+        }
+        val title = TextView(ctx).apply {
+            text = heading
+            setTextColor(ctx.getColor(R.color.text_primary))
+            textSize = 16f
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        val body = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            addView(TextView(ctx).apply {
+                text = bodyText
+                setTextColor(ctx.getColor(R.color.text_secondary))
+                textSize = 15f
+                setLineSpacing(0f, 1.15f)
+                updatePadding(top = (10 * d).toInt())
+            })
+            addView(TextView(ctx).apply {
+                text = getString(R.string.transit_reading_tap_for_dates)
+                setTextColor(ctx.getColor(R.color.gold))
+                textSize = 13f
+                updatePadding(top = (10 * d).toInt())
+                isClickable = true
+                setOnClickListener { openDetail(aspect, state) }
+            })
+        }
+        return LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_reading_card)
             updatePadding((14 * d).toInt(), (14 * d).toInt(), (14 * d).toInt(), (14 * d).toInt())
@@ -144,34 +184,30 @@ class TransitReadingFragment : Fragment() {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = (10 * d).toInt() }
             isClickable = true
-            setOnClickListener { openDetail(aspect, state) }
+            addView(LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(title)
+                addView(arrow)
+            })
+            addView(TextView(ctx).apply {
+                text = phase
+                setTextColor(ctx.getColor(R.color.gold))
+                textSize = 13f
+                updatePadding(top = (2 * d).toInt())
+            })
+            addView(body)
+            setOnClickListener {
+                val wasOpen = body.visibility == View.VISIBLE
+                openBody?.visibility = View.GONE
+                openArrow?.text = "▾"
+                if (wasOpen) { openBody = null; openArrow = null } else {
+                    body.visibility = View.VISIBLE
+                    arrow.text = "▴"
+                    openBody = body
+                    openArrow = arrow
+                }
+            }
         }
-        box.addView(TextView(ctx).apply {
-            text = heading
-            setTextColor(ctx.getColor(R.color.text_primary))
-            textSize = 16f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-        })
-        box.addView(TextView(ctx).apply {
-            text = phase
-            setTextColor(ctx.getColor(R.color.gold))
-            textSize = 13f
-            updatePadding(top = (2 * d).toInt())
-        })
-        box.addView(TextView(ctx).apply {
-            text = body
-            setTextColor(ctx.getColor(R.color.text_secondary))
-            textSize = 15f
-            setLineSpacing(0f, 1.15f)
-            updatePadding(top = (8 * d).toInt())
-        })
-        box.addView(TextView(ctx).apply {
-            text = getString(R.string.transit_reading_tap_for_dates)
-            setTextColor(ctx.getColor(R.color.text_secondary))
-            textSize = 12f
-            updatePadding(top = (8 * d).toInt())
-        })
-        return box
     }
 
     private fun openDetail(aspect: TransitAspect, state: TransitUiState) {

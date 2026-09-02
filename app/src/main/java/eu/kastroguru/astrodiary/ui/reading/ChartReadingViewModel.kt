@@ -3,6 +3,7 @@ package eu.kastroguru.astrodiary.ui.reading
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.kastroguru.astrodiary.data.InterpretationAssets
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
 import eu.kastroguru.astrodiary.domain.RulershipChain
@@ -23,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ChartReadingViewModel @Inject constructor(
     private val repository: BirthDataRepository,
+    private val written: InterpretationAssets,
 ) : ViewModel() {
 
     /** One block of the reading: a heading the screen builds names for, and the text itself. */
@@ -71,10 +73,13 @@ class ChartReadingViewModel @Inject constructor(
             sections += Section("asc", ascSign, null, null, null, it, Section.Kind.WHO_YOU_ARE)
         }
 
-        // How each body plays out, and where it is actually decided.
+        // How each body plays out, and where it is actually decided. A written text wins; the
+        // composed one is the stand-in until this body's combinations are all written.
         for (key in longitudes.keys) {
             val link = RulershipChain.linkFor(key, longitudes, cusps) ?: continue
-            NatalInterpretations.planetInHouseWithRuler(link)?.let {
+            val text = written.chain(key, link.houseOfPlanet, link.rulerKey, link.houseOfRuler)
+                ?: NatalInterpretations.planetInHouseWithRuler(link)
+            text?.let {
                 sections += Section(
                     planetKey = key,
                     sign = ZodiacSign.fromDegree(norm(longitudes.getValue(key))),
