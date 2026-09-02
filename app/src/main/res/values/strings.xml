@@ -358,4 +358,6 @@
     <string name="transit_reading_none">Nothing is close enough to count right now. Come back in a few days.</string>
     <string name="transit_reading_no_text">These two are in contact right now.</string>
     <string name="help_transit_reading">What the sky is doing to the chosen person\'s chart today, strongest first. There is nothing to set here on purpose — these are simply the contacts that are active now. Tap one to see when it began, when it is exact and when it fades. The full transit screen, with the aspectarian and the date controls, is behind the wheel icon above.</string>
+    <string name="about_section_title">About</string>
+    <string name="app_version">Version %1$s (%2$d)</string>
 </resources>

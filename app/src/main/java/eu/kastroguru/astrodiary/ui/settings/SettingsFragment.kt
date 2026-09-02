@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import dagger.hilt.android.AndroidEntryPoint
+import eu.kastroguru.astrodiary.BuildConfig
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.data.ReadingMode
 import eu.kastroguru.astrodiary.data.ReadingModeStore
@@ -35,6 +36,11 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // The version is here because a user reporting a problem has no other way to say which
+        // build they are on, and the store listing lags behind what is installed.
+        binding.tvAppVersion.text =
+            getString(R.string.app_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
 
         // ── Chart display settings ────────────────────────────────────────────
         val houseSystemNames  = arrayOf("Placidus", "Whole Sign", "Koch", "Equal", "Regiomontanus", "Porphyry")
