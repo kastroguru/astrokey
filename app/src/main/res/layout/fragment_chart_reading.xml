@@ -40,6 +40,16 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
+                <!-- Plain mode never passes through the person's data screen, so without this the
+                     synastry reading is unreachable for everyone who is not an astrologer. -->
+                <Button
+                    android:id="@+id/buttonSynastry"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/synastry_open" />
+
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>

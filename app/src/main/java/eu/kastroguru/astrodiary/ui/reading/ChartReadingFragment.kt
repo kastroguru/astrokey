@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
@@ -41,6 +42,15 @@ class ChartReadingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val id = arguments?.getLong("birthDataId") ?: return
         viewModel.load(id)
+
+        // The only route to synastry for plain-mode readers: they come straight here from the
+        // list and never see the data screen that carries the other entry point.
+        binding.buttonSynastry.setOnClickListener {
+            findNavController().navigate(
+                R.id.synastryFragment,
+                Bundle().apply { putLong("birthDataId", id) },
+            )
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
