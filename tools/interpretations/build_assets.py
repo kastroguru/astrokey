@@ -11,8 +11,14 @@ CSV round-trip that the texts are actually written in stays trivial.
 Content CSV columns:
   chain      planet,house,ruler,ruler_house,bg,en
   placement  planet,house,sign,bg,en
+  resonance  point,colour,outcome,title_bg,title_en,bg,en
+  cusp       kind,sign,outcome,title_bg,title_en,bg,en
+  band       key,bg,en
+
+The last two belong to the synastry module and are held to a stricter rule than the rest of the
+corpus: they must not read as astrology at all. See `ban_astrology`.
 """
-import csv, json, os, sys
+import csv, json, os, re, sys
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,14 +27,32 @@ ASSETS = os.path.abspath(HERE + "/../../app/src/main/assets/interpretations")
 
 CHAIN_COLS = ["planet", "house", "ruler", "ruler_house", "bg", "en"]
 PLACEMENT_COLS = ["planet", "house", "sign", "bg", "en"]
+RESONANCE_COLS = ["point", "colour", "outcome", "title_bg", "title_en", "bg", "en"]
+CUSP_COLS = ["kind", "sign", "outcome", "title_bg", "title_en", "bg", "en"]
+BAND_COLS = ["key", "bg", "en"]
+
 
 # Every combination the app can ask for, so coverage is a fact rather than a feeling.
 PLANETS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
 RULERS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]   # the ancient seven
 SIGNS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo",
          "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+# The house-and-sign dimension covers everything the chart screen plots, not only the ten planets:
+# both lunar nodes, Chiron and Lilith are read there too. Ketu is never stored — it is exactly
+# opposite Rahu — but it is read, so it is written.
+PLACEMENT_BODIES = PLANETS + ["rahu", "ketu", "chiron", "lilith"]
 TOTAL_CHAIN = len(PLANETS) * 12 * len(RULERS) * 12          # 10 080
-TOTAL_PLACEMENT = len(PLANETS) * 12 * len(SIGNS)            # 1 440
+TOTAL_PLACEMENT = len(PLACEMENT_BODIES) * 12 * len(SIGNS)   # 2 016
+
+# The synastry grids. A point is one of the seven classical bodies; a colour is any of the ten.
+POINTS = ["sun", "moon", "mercury", "venus", "mars"]   # only these five ask
+COLOURS = PLANETS
+CUSP_KINDS = ["descendant", "imum_coeli"]
+# Every cell is written twice: once for when the partner carries the colour and once for when
+# they do not. The reading shows one or the other, never both.
+OUTCOMES = ["met", "miss"]
+TOTAL_RESONANCE = (len(POINTS) * len(COLOURS) - len(POINTS)) * len(OUTCOMES)   # 126
+TOTAL_CUSP = len(CUSP_KINDS) * 12 * len(OUTCOMES)                             # 48
 
 # Which chain combinations can physically exist.
 #
@@ -76,7 +100,7 @@ def read_content(kind, cols):
 
 # The texts are written by hand in large batches, so the things that went wrong once are checked
 # here rather than trusted: a bad row must stop the build instead of shipping into the app.
-RUSSIANISMS = ["скучн", "быт", "нужно е да", "являет"]          # sound wrong to a Bulgarian ear
+RUSSIANISMS = ["быт", "нужно е да", "являет"]          # sound wrong to a Bulgarian ear
 CHART_WORDS_BG = ["Слънцето", "Луната", "владетел", "хороскоп", "натална", "асцендент"]
 CHART_WORDS_EN = ["ruler of", "natal chart", "the chart shows"]
 # The corpus addresses the reader in the generic masculine throughout, so a feminine form is an
@@ -84,6 +108,113 @@ CHART_WORDS_EN = ["ruler of", "natal chart", "the chart shows"]
 # "спокойна работа" and "точността идва сама" agree with a noun and are fine.
 GENDERED_BG = ["сте сама", "останете сама", "броите сама", "но не сама",
                "сте тази, ", "обичана", "уморена", "изтощена", "готова сте"]
+
+# ── The synastry corpus must not read as astrology ────────────────────────────
+#
+# The rest of the corpus only avoids naming the planet, the house and the ruler. These two grids
+# go further: the reader should not be able to work out which position is being described at all.
+# Naming the mechanism pulls them back into the chart and out of their own life, which is the one
+# thing this module exists to avoid. So the whole vocabulary is refused, not just the obvious part.
+#
+# Word boundaries matter here. Bare "дом" is ordinary Bulgarian for home and stays allowed; it is
+# the numbered house that is banned. "Слънце" and "Луна" are banned outright — a practical text has
+# no reason to reach for either.
+ASTRO_BAN_BG = [
+    r"Овен", r"Телец", r"Близнац", r"\bРак\b", r"\bЛъв\b", r"\bДева\b", r"\bВезни\b",
+    r"Скорпион", r"Стрелец", r"Козирог", r"Водолей", r"\bРиби\b",
+    r"[Сс]лънц", r"[Лл]ун[аи]", r"Меркурий", r"Венера", r"\bМарс", r"Юпитер", r"Сатурн",
+    r"Уран\b", r"Нептун", r"Плутон",
+    r"аспект", r"квадрат", r"тригон", r"секстил", r"опозиц", r"съвпад", r"квинконс", r"орбис",
+    r"хороскоп", r"асцендент", r"десцендент", r"зодиак", r"натал", r"транзит", r"ретрограден",
+    r"владетел", r"куспид", r"[Кк]арта(та)?\b", r"планет",
+    r"(първи|втори|трети|четвърти|пети|шести|седми|осми|девети|десети|"
+    r"единадесети|дванадесети|единайсети|дванайсети)\s+дом",
+]
+ASTRO_BAN_EN = [
+    r"\baries\b", r"\btaurus\b", r"\bgemini\b", r"\bcancer\b", r"\bleo\b", r"\bvirgo\b",
+    r"\blibra\b", r"\bscorpio\b", r"\bsagittarius\b", r"\bcapricorn\b", r"\baquarius\b",
+    r"\bpisces\b",
+    r"\bsun\b", r"\bmoon\b", r"\bmercury\b", r"\bvenus\b", r"\bmars\b", r"\bjupiter\b",
+    r"\bsaturn\b", r"\buranus\b", r"\bneptune\b", r"\bpluto\b",
+    r"\baspect", r"\bsquare\b", r"\btrine\b", r"\bsextile\b", r"\bopposition\b",
+    r"\bconjunct", r"\bquincunx\b", r"\borb\b",
+    r"horoscope", r"ascendant", r"descendant", r"zodiac", r"\bnatal\b", r"\btransit",
+    r"retrograde", r"\bruler\b", r"\bcusp\b", r"\bchart\b", r"\bplanet",
+    r"(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)\s+house",
+]
+
+def ban_astrology(text, lang):
+    """Every banned pattern this text trips, so the writer sees all of them at once."""
+    patterns = ASTRO_BAN_BG if lang == "bg" else ASTRO_BAN_EN
+    flags = 0 if lang == "bg" else re.IGNORECASE
+    return [p for p in patterns if re.search(p, text, flags)]
+
+def validate_synastry(resonance, cusp):
+    """The two synastry grids: the usual hygiene, plus the no-astrology rule, plus the titles.
+
+    Titles are held to a different shape than bodies — they are card headings, so they are short
+    and need not be two sentences — but to the same vocabulary rule, because the heading is the
+    first thing the reader meets and gives the position away fastest of all.
+    """
+    problems = []
+    seen_key, seen_text, seen_title = {}, {}, {}
+    for r in resonance:
+        key = (r["point"], r["colour"], r["outcome"])
+        if key in seen_key:
+            problems.append("дублиран ключ %s" % (key,))
+        seen_key[key] = True
+        if r["point"] not in POINTS:
+            problems.append("непозната точка %s" % r["point"])
+        if r["colour"] not in COLOURS:
+            problems.append("непознат цвят %s" % r["colour"])
+        if r["point"] == r["colour"]:
+            problems.append("точка и цвят съвпадат: %s" % r["point"])
+        if r["outcome"] not in OUTCOMES:
+            problems.append("непознат изход %s" % r["outcome"])
+    for r in cusp:
+        key = (r["kind"], r["sign"], r["outcome"])
+        if key in seen_key:
+            problems.append("дублиран ключ %s" % (key,))
+        seen_key[key] = True
+        if r["kind"] not in CUSP_KINDS:
+            problems.append("непознат вид куспида %s" % r["kind"])
+        if r["sign"] not in SIGNS:
+            problems.append("непознат знак %s" % r["sign"])
+        if r["outcome"] not in OUTCOMES:
+            problems.append("непознат изход %s" % r["outcome"])
+
+    for r in resonance + cusp:
+        for lang in ("bg", "en"):
+            t = r[lang]
+            if t in seen_text:
+                problems.append("повтарящ се текст (%s): %s…" % (lang, t[:60]))
+            seen_text[t] = True
+            if "  " in t or t != t.strip():
+                problems.append("двойни/висящи интервали: %s…" % t[:60])
+            if t.endswith(","):
+                problems.append("текстът свършва със запетая: %s…" % t[:60])
+            if t.count(".") + t.count("!") + t.count("?") < 2:
+                problems.append("под две изречения: %s…" % t[:60])
+            for hit in ban_astrology(t, lang):
+                problems.append("астрологичен речник „%s“ (%s): %s…" % (hit, lang, t[:60]))
+
+            title = r["title_" + lang]
+            if title in seen_title:
+                problems.append("повтарящо се заглавие (%s): %s" % (lang, title))
+            seen_title[title] = True
+            if not title.strip():
+                problems.append("празно заглавие (%s) за %s" % (lang, r))
+            if len(title) > 60:
+                problems.append("заглавие над 60 знака (%s): %s" % (lang, title))
+            if title.endswith("."):
+                problems.append("заглавието свършва с точка: %s" % title)
+            for hit in ban_astrology(title, lang):
+                problems.append("астрологичен речник в заглавие „%s“ (%s): %s" % (hit, lang, title))
+        for w in RUSSIANISMS + GENDERED_BG:
+            if w in r["bg"]:
+                problems.append("„%s“ в български текст: %s…" % (w, r["bg"][:60]))
+    return problems
+
 
 def validate(chain, placement):
     problems = []
@@ -110,6 +241,13 @@ def validate(chain, placement):
         for w in CHART_WORDS_EN:
             if w in r["en"].lower():
                 problems.append("'%s' in English text: %s…" % (w, r["en"][:60]))
+    for r in placement:
+        if r["planet"] not in PLACEMENT_BODIES:
+            problems.append("непознато тяло %s" % r["planet"])
+        if r["sign"] not in SIGNS:
+            problems.append("непознат знак %s" % r["sign"])
+        if not 1 <= int(r["house"]) <= 12:
+            problems.append("дом извън 1..12: %s" % r["house"])
     for r in chain:
         allowed = allowed_ruler_houses(r["planet"], int(r["house"]), r["ruler"])
         if int(r["ruler_house"]) not in allowed:
@@ -123,7 +261,15 @@ def validate(chain, placement):
 def build():
     chain = read_content("chain", CHAIN_COLS)
     placement = read_content("placement", PLACEMENT_COLS)
+    resonance = read_content("resonance", RESONANCE_COLS)
+    cusp = read_content("cusp", CUSP_COLS)
+    band = read_content("band", BAND_COLS)
     validate(chain, placement)
+    synastry_problems = validate_synastry(resonance, cusp)
+    if synastry_problems:
+        print("\n".join("!! " + p for p in synastry_problems[:40]))
+        print("!! общо %d проблема в синастрията — нищо не е записано" % len(synastry_problems))
+        sys.exit(1)
 
     per_planet = defaultdict(dict)
     for r in chain:
@@ -133,6 +279,23 @@ def build():
         key = "%s|%s" % (r["house"], r["sign"])
         per_planet[("placement", r["planet"])][key] = {"bg": r["bg"], "en": r["en"]}
 
+    # The synastry grids are small enough to ship as one file each: 63 and 24 entries, opened
+    # together whenever the synastry screen is drawn, so splitting them per body would only cost
+    # extra parses.
+    synastry = {"resonance": {}, "cusp": {}, "band": {}}
+    for r in resonance:
+        synastry["resonance"]["%s|%s|%s" % (r["point"], r["colour"], r["outcome"])] = {
+            "bg": r["bg"], "en": r["en"],
+            "title_bg": r["title_bg"], "title_en": r["title_en"],
+        }
+    for r in band:
+        synastry["band"][r["key"]] = {"bg": r["bg"], "en": r["en"]}
+    for r in cusp:
+        synastry["cusp"]["%s|%s|%s" % (r["kind"], r["sign"], r["outcome"])] = {
+            "bg": r["bg"], "en": r["en"],
+            "title_bg": r["title_bg"], "title_en": r["title_en"],
+        }
+
     os.makedirs(ASSETS, exist_ok=True)
     written = 0
     for (kind, planet), entries in sorted(per_planet.items()):
@@ -140,6 +303,12 @@ def build():
         with open(path, "w", encoding="utf-8") as f:
             json.dump(entries, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         written += len(entries)
+        print("%-28s %5d записа" % (os.path.basename(path), len(entries)))
+
+    for name, entries in sorted(synastry.items()):
+        path = "%s/%s.json" % (ASSETS, name)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         print("%-28s %5d записа" % (os.path.basename(path), len(entries)))
 
     dup = len(chain) + len(placement) - written
@@ -157,6 +326,30 @@ def build():
     if started:
         print("непълни започнати клетки: " + ", ".join("%s h%d липсват %d" % (c[0], c[1], n) for c, n in started))
     print("дом и знак  %5d / %5d  (%.1f%%)" % (len(placement), TOTAL_PLACEMENT, 100.0 * len(placement) / TOTAL_PLACEMENT))
+    have_pl = {(r["planet"], int(r["house"]), r["sign"]) for r in placement}
+    short = []
+    for b in PLACEMENT_BODIES:
+        missing = sum(1 for h in range(1, 13) for sg in SIGNS if (b, h, sg) not in have_pl)
+        if 0 < missing < 144:
+            short.append("%s липсват %d" % (b, missing))
+    if short:
+        print("непълни тела (дом и знак): " + ", ".join(short))
+    print("резонанс    %5d / %5d  (%.1f%%)" % (len(resonance), TOTAL_RESONANCE,
+                                                100.0 * len(resonance) / TOTAL_RESONANCE))
+    have_res = {(r["point"], r["colour"], r["outcome"]) for r in resonance}
+    missing_res = [(p, c, o) for p in POINTS for c in COLOURS for o in OUTCOMES
+                   if p != c and (p, c, o) not in have_res]
+    if missing_res:
+        print("липсват двойки: " + ", ".join("%s←%s/%s" % pc for pc in missing_res[:20]) +
+              (" …" if len(missing_res) > 20 else ""))
+    print("куспиди     %5d / %5d  (%.1f%%)" % (len(cusp), TOTAL_CUSP,
+                                               100.0 * len(cusp) / TOTAL_CUSP))
+    have_cusp = {(r["kind"], r["sign"], r["outcome"]) for r in cusp}
+    missing_cusp = [(k, sg, o) for k in CUSP_KINDS for sg in SIGNS for o in OUTCOMES
+                    if (k, sg, o) not in have_cusp]
+    if missing_cusp:
+        print("липсват куспиди: " + ", ".join("%s|%s/%s" % kc for kc in missing_cusp[:24]))
+    print("ленти       %5d / %5d" % (len(band), 7))
     if dup:
         print("!! %d дублирани ключа са презаписани — проверй съдържанието" % dup)
 

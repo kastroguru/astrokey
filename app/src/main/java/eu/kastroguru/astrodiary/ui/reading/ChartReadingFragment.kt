@@ -71,10 +71,11 @@ class ChartReadingFragment : Fragment() {
         var lastKind: ChartReadingViewModel.Section.Kind? = null
         for (section in sections) {
             if (section.kind != lastKind) {
-                box.addView(groupHeading(
-                    if (section.kind == ChartReadingViewModel.Section.Kind.WHO_YOU_ARE)
-                        getString(R.string.reading_group_who) else getString(R.string.reading_group_world)
-                ))
+                box.addView(groupHeading(getString(when (section.kind) {
+                    ChartReadingViewModel.Section.Kind.WHO_YOU_ARE -> R.string.reading_group_who
+                    ChartReadingViewModel.Section.Kind.HOW_IT_SHOWS -> R.string.reading_group_shows
+                    ChartReadingViewModel.Section.Kind.IN_THE_WORLD -> R.string.reading_group_world
+                })))
                 lastKind = section.kind
             }
             box.addView(collapsible(headingFor(section), if (bulgarian) section.text.bg else section.text.en))
@@ -86,6 +87,8 @@ class ChartReadingFragment : Fragment() {
         val ctx = requireContext()
         val subject = when (s.planetKey) {
             "asc" -> getString(R.string.point_asc)
+            // Ketu is read but is not a `Planet`, so it needs its own name here.
+            "ketu" -> getString(R.string.point_ketu)
             else -> Planet.values().find { it.key == s.planetKey }?.localizedName(ctx) ?: ""
         }
         val parts = mutableListOf<String>()

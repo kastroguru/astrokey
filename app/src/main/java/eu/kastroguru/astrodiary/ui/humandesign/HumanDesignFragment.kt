@@ -95,7 +95,7 @@ class HumanDesignFragment : Fragment() {
         buildActivations(chart)
 
         // Detailed descriptions
-        buildDescriptions(chart)
+        buildDescriptions(state, chart)
     }
 
     private fun buildActivations(chart: HumanDesignChart) {
@@ -173,7 +173,7 @@ class HumanDesignFragment : Fragment() {
     private fun Pair<String, String>.loc() = if (isBg()) second else first
 
     // ── Description cards ─────────────────────────────────────────────────────
-    private fun buildDescriptions(chart: HumanDesignChart) {
+    private fun buildDescriptions(state: HumanDesignUiState, chart: HumanDesignChart) {
         binding.descriptionsContainer.removeAllViews()
 
         // Type
@@ -220,6 +220,9 @@ class HumanDesignFragment : Fragment() {
             )
         }
 
+        // ── Today (transit gates against this chart) ──────────────────────────
+        buildTodayCard(state.transitGates)
+
         // Defined Centers
         if (chart.definedCenters.isNotEmpty()) {
             val centerItems = chart.definedCenters.mapNotNull { center ->
@@ -249,6 +252,18 @@ class HumanDesignFragment : Fragment() {
                     heading = null,
                     items   = items
                 )
+
+            // ── How the openness conditions you — the not-self layer ──────────
+            val conditioning = undefinedCenters.mapNotNull { center ->
+                HdOpenCenterTexts.conditioning[center]?.loc()?.let { centerName(center) to it }
+            }
+            if (conditioning.isNotEmpty())
+                addDescCard(
+                    title   = if (isBg()) "Къде не сте себе си" else "Where you are not yourself",
+                    heading = if (isBg()) "Фалшивите въпроси на отвореното"
+                              else "The false questions of your openness",
+                    items   = conditioning
+                )
         }
 
         // Active Channels
@@ -265,6 +280,220 @@ class HumanDesignFragment : Fragment() {
                     items   = channelItems
                 )
         }
+
+        // ── Hanging gates — what you look for in others ───────────────────────
+        buildHangingCard(chart)
+
+        // ── Variable — the four arrows ────────────────────────────────────────
+        buildVariableCard(chart)
+
+        // ── The child's chart read as parenting advice ────────────────────────
+        buildParentingCard(chart)
+
+        // ── Connection chart ──────────────────────────────────────────────────
+        buildConnectionCard(state)
+    }
+
+    // ── Labels ────────────────────────────────────────────────────────────────
+    private fun gateLabel(g: Int) = if (isBg()) "Гейт $g" else "Gate $g"
+
+    /** Localized channel name, taken from the one place it is already written. */
+    private fun channelLabel(ch: HdChannel): String =
+        HdDescriptions.channelDescriptionFor(ch)?.loc()?.substringBefore(':')?.trim() ?: ch.name
+
+    // ── Today ─────────────────────────────────────────────────────────────────
+    private fun buildTodayCard(transits: List<HdTransitGate>) {
+        if (transits.isEmpty()) return
+
+        // One line per effect group, strongest first, then the per-gate texts inside it.
+        val items = mutableListOf<Pair<String, String>>()
+        for (eff in listOf(HdTransitEffect.COMPLETES, HdTransitEffect.AMPLIFIES, HdTransitEffect.OPEN)) {
+            val group = transits.filter { it.effect == eff }
+            if (group.isEmpty()) continue
+            HdGateTransitTexts.effect[eff]?.loc()?.let { items += effectLabel(eff) to it }
+            // Two bodies can sit in the same gate today; merge them onto one line instead of
+            // printing the gate's text twice.
+            for ((gate, sameGate) in group.groupBy { it.gate }) {
+                val text = HdGateTransitTexts.gate[gate]?.loc() ?: continue
+                val t = sameGate.first()
+                val bodies = sameGate.joinToString(" ") { "${it.body.glyph}${it.line}" }
+                val head = if (t.effect == HdTransitEffect.COMPLETES && t.completedChannel != null)
+                    "${gateLabel(gate)} · $bodies → ${channelLabel(t.completedChannel)}"
+                else
+                    "${gateLabel(gate)} · $bodies"
+                items += head to text
+            }
+        }
+        addDescCard(
+            title   = if (isBg()) "Днес" else "Today",
+            heading = if (isBg()) "Небето върху вашата карта" else "The sky against your own chart",
+            items   = items
+        )
+    }
+
+    private fun effectLabel(e: HdTransitEffect) = when (e) {
+        HdTransitEffect.COMPLETES -> if (isBg()) "Затваря верига у вас" else "Closes a circuit in you"
+        HdTransitEffect.AMPLIFIES -> if (isBg()) "Усилва ваше" else "Amplifies what you have"
+        HdTransitEffect.OPEN      -> if (isBg()) "Пада в отвореното" else "Lands in your openness"
+    }
+
+    // ── Hanging gates ─────────────────────────────────────────────────────────
+    private fun buildHangingCard(chart: HumanDesignChart) {
+        if (chart.hangingGates.isEmpty()) return
+        // A gate can hang in several channels at once (10 hangs towards 20, 34 and 57). The text is
+        // keyed by gate, so group first — otherwise the same paragraph prints two or three times.
+        val items = chart.hangingGates.groupBy { it.gate }.mapNotNull { (gate, hangs) ->
+            val text = HdHangingGateTexts.seeking[gate]?.loc() ?: return@mapNotNull null
+            val seeks = hangs.map { it.seeks }.sorted().joinToString(", ")
+            val channels = hangs.joinToString(", ") { channelLabel(it.channel) }
+            val head = "${gateLabel(gate)} → $seeks  ·  $channels" +
+                if (hangs.any { it.opensNewCentre })
+                    (if (isBg()) "  ·  отваря нов център" else "  ·  opens a new centre")
+                else ""
+            head to text
+        }
+        if (items.isEmpty()) return
+        addDescCard(
+            title   = if (isBg()) "Какво търсите в другите" else "What you look for in others",
+            heading = if (isBg()) "Висящи гейтове (${items.size})" else "Hanging gates (${items.size})",
+            items   = items
+        )
+    }
+
+    // ── Variable ──────────────────────────────────────────────────────────────
+    private fun buildVariableCard(chart: HumanDesignChart) {
+        val v = chart.variables ?: return
+        val items = mutableListOf<Pair<String, String>>()
+
+        // Heading + "what this arrow is", then the person's own value as a continuation paragraph.
+        fun add(introKey: String, label: String, value: String, body: String?) {
+            if (body == null) return
+            val intro = HdVariableTexts.intro[introKey]?.loc()
+            items += "$label — $value" to (intro ?: body)
+            if (intro != null) items += "" to body
+        }
+
+        add("determination",
+            if (isBg()) "Храносмилане (Слънце в дизайна)" else "Digestion (Design Sun)",
+            determinationName(v.determination),
+            HdVariableTexts.determination[v.determination]?.loc())
+        add("environment",
+            if (isBg()) "Среда (възел в дизайна)" else "Environment (Design Node)",
+            environmentName(v.environment),
+            HdVariableTexts.environment[v.environment]?.loc())
+        add("motivation",
+            if (isBg()) "Мотивация (личностно Слънце)" else "Motivation (Personality Sun)",
+            motivationName(v.motivation),
+            HdVariableTexts.motivation[v.motivation]?.loc())
+        add("perspective",
+            if (isBg()) "Перспектива (личностен възел)" else "Perspective (Personality Node)",
+            perspectiveName(v.perspective),
+            HdVariableTexts.perspective[v.perspective]?.loc())
+
+        if (items.isEmpty()) return
+
+        if (chart.birthTimeIsRounded) {
+            items += (if (isBg()) "⚠ Точност на часа" else "⚠ Birth-time accuracy") to
+                (if (isBg())
+                    "Часът на раждане е записан на кръгъл час или половин час, което обикновено значи, че е закръглен. Храносмилането и средата се четат до тон — Слънцето минава един тон за около 38 минути — така че при закръглен час втората половина от тези две (вариантът) може да е грешна. Първата половина, самият вид, търпи няколко часа отклонение и остава надеждна."
+                 else
+                    "The stored birth time falls on a round hour or half-hour, which usually means it was rounded. Digestion and Environment are read to the tone — the Sun crosses one tone in about 38 minutes — so with a rounded time the second half of those two (the variant) may be wrong. The first half, the kind itself, tolerates a few hours and stays reliable.")
+        }
+
+        addDescCard(
+            title   = if (isBg()) "Четирите стрелки" else "The four arrows",
+            heading = if (isBg()) "Как приемате и какво ви движи" else "How you take things in, and what moves you",
+            items   = items
+        )
+    }
+
+    // ── Parenting ─────────────────────────────────────────────────────────────
+    private fun buildParentingCard(chart: HumanDesignChart) {
+        val key = HdParentingTexts.keyFor(chart.type, chart.authority)
+        val text = HdParentingTexts.parenting[key]?.loc() ?: return
+        addDescCard(
+            title   = if (isBg()) "Ако това е дете" else "If this is a child",
+            heading = "${getString(typeRes(chart.type))} · ${getString(authorityRes(chart.authority))}",
+            items   = listOf((if (isBg()) "Как да го гледате" else "How to raise them") to text)
+        )
+    }
+
+    // ── Connection chart ──────────────────────────────────────────────────────
+    private fun buildConnectionCard(state: HumanDesignUiState) {
+        val others = state.allBirthData.filter { it.id != state.selected?.id }
+        if (others.isEmpty()) return
+
+        val ctx = requireContext()
+        val none = if (isBg()) "— изберете втори човек —" else "— pick a second person —"
+        val spinner = android.widget.Spinner(ctx).apply {
+            val names = listOf(none) + others.map { it.name }
+            adapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item, names).also {
+                it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+            val idx = others.indexOfFirst { it.id == state.partner?.id }
+            setSelection(if (idx >= 0) idx + 1 else 0)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                    val wanted = if (pos == 0) null else others[pos - 1]
+                    if (wanted?.id != state.partner?.id) viewModel.selectPartner(wanted)
+                }
+                override fun onNothingSelected(p: AdapterView<*>?) {}
+            }
+        }
+
+        val conn = state.connection
+        val items = mutableListOf<Pair<String, String>>()
+        items += "" to HdConnectionTexts.intro.loc()
+
+        if (conn != null) {
+            fun group(kind: HdConnectionKind, links: List<HdChannelConnection>, label: String) {
+                if (links.isEmpty()) return
+                HdConnectionTexts.state[kind]?.loc()?.let { items += "$label (${links.size})" to it }
+                for (l in links) {
+                    val meaning = HdDescriptions.channelDescriptionFor(l.channel)?.loc()
+                        ?.substringAfter(':')?.trim() ?: continue
+                    val head = when (l.state) {
+                        HdConnectionState.ELECTROMAGNETIC ->
+                            "${channelLabel(l.channel)}  ·  ${l.gateFromA} + ${l.gateFromB}"
+                        HdConnectionState.DOMINANCE_A, HdConnectionState.COMPROMISE_B ->
+                            "${channelLabel(l.channel)}  ·  ${state.selected?.name ?: "A"}"
+                        HdConnectionState.DOMINANCE_B, HdConnectionState.COMPROMISE_A ->
+                            "${channelLabel(l.channel)}  ·  ${state.partner?.name ?: "B"}"
+                        else -> channelLabel(l.channel)
+                    }
+                    items += head to meaning
+                }
+            }
+            group(HdConnectionKind.ELECTROMAGNETIC, conn.electromagnetic,
+                if (isBg()) "Електромагнитни — създават се между вас" else "Electromagnetic — created between you")
+            group(HdConnectionKind.COMPROMISE, conn.compromise,
+                if (isBg()) "Компромис — кой отстъпва" else "Compromise — who bends")
+            group(HdConnectionKind.DOMINANCE, conn.dominance,
+                if (isBg()) "Доминиране — кой го носи" else "Dominance — who carries it")
+            group(HdConnectionKind.COMPANIONSHIP, conn.companionship,
+                if (isBg()) "Другарство — общо и лесно" else "Companionship — shared and easy")
+
+            if (conn.aConditionsB.isNotEmpty() || conn.bConditionsA.isNotEmpty()) {
+                items += (if (isBg()) "Обуславяне" else "Conditioning") to HdConnectionTexts.conditioning.loc()
+                if (conn.aConditionsB.isNotEmpty()) items +=
+                    "${state.selected?.name ?: "A"} → ${state.partner?.name ?: "B"}" to
+                        conn.aConditionsB.joinToString(", ") { centerName(it) }
+                if (conn.bConditionsA.isNotEmpty()) items +=
+                    "${state.partner?.name ?: "B"} → ${state.selected?.name ?: "A"}" to
+                        conn.bConditionsA.joinToString(", ") { centerName(it) }
+            }
+            if (conn.bothOpenCentres.isNotEmpty()) {
+                items += (if (isBg()) "Отворено и у двамата" else "Open in both of you") to HdConnectionTexts.bothOpen.loc()
+                items += "" to conn.bothOpenCentres.joinToString(", ") { centerName(it) }
+            }
+        }
+
+        addDescCard(
+            title    = if (isBg()) "Свързваща карта" else "Connection chart",
+            heading  = state.partner?.let { "${state.selected?.name} + ${it.name}" },
+            items    = items,
+            extraTop = spinner
+        )
     }
 
     private fun centerName(c: HdCenter) = when (c) {
@@ -279,7 +508,61 @@ class HumanDesignFragment : Fragment() {
         HdCenter.ROOT         -> if (isBg()) "Корен" else "Root"
     }
 
-    private fun addDescCard(title: String, heading: String?, items: List<Pair<String, String>>) {
+    // ── Variable value names ──────────────────────────────────────────────────
+    private fun determinationName(d: HdDetermination) = when (d) {
+        HdDetermination.APPETITE_CONSECUTIVE -> if (isBg()) "Последователен апетит" else "Consecutive Appetite"
+        HdDetermination.APPETITE_ALTERNATING -> if (isBg()) "Редуващ се апетит" else "Alternating Appetite"
+        HdDetermination.TASTE_OPEN           -> if (isBg()) "Отворен вкус" else "Open Taste"
+        HdDetermination.TASTE_CLOSED         -> if (isBg()) "Затворен вкус" else "Closed Taste"
+        HdDetermination.THIRST_NERVOUS       -> if (isBg()) "Нервна жажда" else "Nervous Thirst"
+        HdDetermination.THIRST_CALM          -> if (isBg()) "Спокойна жажда" else "Calm Thirst"
+        HdDetermination.TOUCH_COLD           -> if (isBg()) "Студен допир" else "Cold Touch"
+        HdDetermination.TOUCH_HOT            -> if (isBg()) "Топъл допир" else "Hot Touch"
+        HdDetermination.SOUND_HIGH           -> if (isBg()) "Висок звук" else "High Sound"
+        HdDetermination.SOUND_LOW            -> if (isBg()) "Нисък звук" else "Low Sound"
+        HdDetermination.LIGHT_DIRECT         -> if (isBg()) "Пряка светлина" else "Direct Light"
+        HdDetermination.LIGHT_INDIRECT       -> if (isBg()) "Непряка светлина" else "Indirect Light"
+    }
+
+    private fun environmentName(e: HdEnvironment) = when (e) {
+        HdEnvironment.CAVES_SELECTIVE    -> if (isBg()) "Избирателни пещери" else "Selective Caves"
+        HdEnvironment.CAVES_WET          -> if (isBg()) "Влажни пещери" else "Wet Caves"
+        HdEnvironment.MARKETS_INTERNAL   -> if (isBg()) "Вътрешни пазари" else "Internal Markets"
+        HdEnvironment.MARKETS_EXTERNAL   -> if (isBg()) "Външни пазари" else "External Markets"
+        HdEnvironment.KITCHENS_WET       -> if (isBg()) "Влажни кухни" else "Wet Kitchens"
+        HdEnvironment.KITCHENS_DRY       -> if (isBg()) "Сухи кухни" else "Dry Kitchens"
+        HdEnvironment.MOUNTAINS_ACTIVE   -> if (isBg()) "Активни планини" else "Active Mountains"
+        HdEnvironment.MOUNTAINS_PASSIVE  -> if (isBg()) "Пасивни планини" else "Passive Mountains"
+        HdEnvironment.VALLEYS_NARROW     -> if (isBg()) "Тесни долини" else "Narrow Valleys"
+        HdEnvironment.VALLEYS_WIDE       -> if (isBg()) "Широки долини" else "Wide Valleys"
+        HdEnvironment.SHORES_NATURAL     -> if (isBg()) "Естествени брегове" else "Natural Shores"
+        HdEnvironment.SHORES_ARTIFICIAL  -> if (isBg()) "Изкуствени брегове" else "Artificial Shores"
+    }
+
+    private fun motivationName(m: HdMotivation) = when (m) {
+        HdMotivation.FEAR      -> if (isBg()) "Страх" else "Fear"
+        HdMotivation.HOPE      -> if (isBg()) "Надежда" else "Hope"
+        HdMotivation.DESIRE    -> if (isBg()) "Желание" else "Desire"
+        HdMotivation.NEED      -> if (isBg()) "Нужда" else "Need"
+        HdMotivation.GUILT     -> if (isBg()) "Вина" else "Guilt"
+        HdMotivation.INNOCENCE -> if (isBg()) "Невинност" else "Innocence"
+    }
+
+    private fun perspectiveName(p: HdPerspective) = when (p) {
+        HdPerspective.SURVIVAL    -> if (isBg()) "Оцеляване" else "Survival"
+        HdPerspective.POSSIBILITY -> if (isBg()) "Възможност" else "Possibility"
+        HdPerspective.POWER       -> if (isBg()) "Сила" else "Power"
+        HdPerspective.WANTING     -> if (isBg()) "Искане" else "Wanting"
+        HdPerspective.PROBABILITY -> if (isBg()) "Вероятност" else "Probability"
+        HdPerspective.PERSONAL    -> if (isBg()) "Лично" else "Personal"
+    }
+
+    private fun addDescCard(
+        title: String,
+        heading: String?,
+        items: List<Pair<String, String>>,
+        extraTop: View? = null
+    ) {
         val ctx = requireContext()
         val card = MaterialCardView(ctx).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -320,6 +603,13 @@ class HumanDesignFragment : Fragment() {
             })
         }
 
+        // A control that must stay visible even while the body is collapsed (the partner spinner).
+        extraTop?.let {
+            inner.addView(it, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ).also { lp -> lp.bottomMargin = dp(8) })
+        }
+
         // Collapsible body — tapping header shows/hides content
         val bodyContainer = LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
@@ -333,8 +623,8 @@ class HumanDesignFragment : Fragment() {
         inner.addView(collapseHint)
 
         for ((label, body) in items) {
-            // Label
-            bodyContainer.addView(TextView(ctx).apply {
+            // Label — blank labels are used for continuation paragraphs
+            if (label.isNotEmpty()) bodyContainer.addView(TextView(ctx).apply {
                 text = label
                 setTextColor(ContextCompat.getColor(ctx, R.color.gold))
                 textSize = 12f

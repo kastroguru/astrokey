@@ -149,5 +149,11 @@ data class HumanDesignChart(
     val authority: HdAuthority,
     val profilePersonalityLine: Int,        // line of Personality Sun
     val profileDesignLine: Int,             // line of Design Sun
-    val definition: HdDefinition
+    val definition: HdDefinition,
+    /** One half of a channel active, the other missing — what this person seeks in others. */
+    val hangingGates: List<HdHangingGate> = emptyList(),
+    /** The four arrows (Determination, Environment, Motivation, Perspective); see HdVariables.kt. */
+    val variables: HdVariables? = null,
+    /** True when the stored birth time is a round hour or half-hour — the tone is then unreliable. */
+    val birthTimeIsRounded: Boolean = false
 )

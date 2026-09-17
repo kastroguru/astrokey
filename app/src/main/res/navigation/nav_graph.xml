@@ -230,6 +230,15 @@
         <argument android:name="birthDataId" app:argType="long" android:defaultValue="0L" />
     </fragment>
 
+    <!-- What already works between two people -->
+    <fragment
+        android:id="@+id/synastryFragment"
+        android:name="eu.kastroguru.astrodiary.ui.synastry.SynastryFragment"
+        android:label="@string/synastry_title"
+        tools:layout="@layout/fragment_synastry">
+        <argument android:name="birthDataId" app:argType="long" android:defaultValue="0L" />
+    </fragment>
+
     <!-- Current transits, read as words -->
     <fragment
         android:id="@+id/transitReadingFragment"

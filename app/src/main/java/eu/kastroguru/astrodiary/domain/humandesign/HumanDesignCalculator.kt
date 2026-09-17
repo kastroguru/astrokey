@@ -67,6 +67,14 @@ class HumanDesignCalculator @Inject constructor(
         val persSunLine = personality.first { it.body == HdBody.SUN }.line
         val desSunLine  = design.first { it.body == HdBody.SUN }.line
 
+        // ── Sub-line layer: the four arrows ───────────────────────────────────
+        val variables = variablesFor(
+            designSunLong = designLong["sun"] ?: 0.0,
+            designNodeLong = designLong["north_node"] ?: 0.0,
+            personalitySunLong = personalityLong["sun"] ?: 0.0,
+            personalityNodeLong = personalityLong["north_node"] ?: 0.0
+        )
+
         return HumanDesignChart(
             personality = personality,
             design = design,
@@ -77,7 +85,10 @@ class HumanDesignCalculator @Inject constructor(
             authority = authority,
             profilePersonalityLine = persSunLine,
             profileDesignLine = desSunLine,
-            definition = definition
+            definition = definition,
+            hangingGates = hangingGatesOf(activeGates, definedCenters),
+            variables = variables,
+            birthTimeIsRounded = needsExactBirthTime(birth.hour, birth.minutes)
         )
     }
 

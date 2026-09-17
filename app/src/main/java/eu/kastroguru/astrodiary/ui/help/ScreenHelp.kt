@@ -17,6 +17,7 @@ object ScreenHelp {
         R.id.birthDataDetailFragment to R.string.help_birth_data_detail,
         R.id.chartFragment to R.string.help_chart,
         R.id.chartReadingFragment to R.string.help_chart_reading,
+        R.id.synastryFragment to R.string.help_synastry,
         R.id.planetTableFragment to R.string.help_planet_table,
         R.id.eventListFragment to R.string.help_event_list,
         R.id.eventFormFragment to R.string.help_event_form,

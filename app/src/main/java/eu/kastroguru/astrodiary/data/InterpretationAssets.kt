@@ -3,6 +3,7 @@ package eu.kastroguru.astrodiary.data
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.kastroguru.astrodiary.domain.interpretation.Bilingual
+import eu.kastroguru.astrodiary.domain.synastry.SynastryCard
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,6 +51,42 @@ class InterpretationAssets @Inject constructor(@ApplicationContext private val c
     /** A body in a house and a sign. */
     fun placement(planetKey: String, house: Int, sign: String): Bilingual? =
         lookup("placement_$planetKey", "$house|${sign.lowercase()}")
+
+    /**
+     * A card in the synastry reading: a heading and a body, both in two languages.
+     *
+     * These carry a title of their own because the synastry texts are deliberately written to read
+     * as ordinary life rather than as astrology, so the usual heading — the placement, spelled out
+     * above the paragraph — would give away the very thing the text is avoiding.
+     */
+    private fun card(name: String, key: String): SynastryCard? {
+        val entry = file(name)?.optJSONObject(key) ?: return null
+        val bg = entry.optString("bg")
+        val en = entry.optString("en")
+        val titleBg = entry.optString("title_bg")
+        val titleEn = entry.optString("title_en")
+        if (bg.isBlank() || en.isBlank() || titleBg.isBlank() || titleEn.isBlank()) return null
+        return SynastryCard(
+            title = Bilingual(en = titleEn, bg = titleBg),
+            body = Bilingual(en = en, bg = bg),
+        )
+    }
+
+    /**
+     * What a point wants, written twice: [met] when the partner carries the colour and again for
+     * when they do not. Keyed point → colour → outcome.
+     */
+    fun resonance(point: String, colour: String, met: Boolean): SynastryCard? =
+        card("resonance", "$point|$colour|${outcome(met)}")
+
+    /** What the descendant or the imum coeli wants, by the sign it falls in, met or not. */
+    fun cusp(kind: String, sign: String, met: Boolean): SynastryCard? =
+        card("cusp", "$kind|${sign.lowercase()}|${outcome(met)}")
+
+    private fun outcome(met: Boolean) = if (met) "met" else "miss"
+
+    /** A score band, or the paragraph that introduces the synastry reading. */
+    fun band(key: String): Bilingual? = lookup("band", key)
 
     /** How many combinations are written, for the progress report. */
     fun writtenCount(kind: String, planetKey: String): Int = file("${kind}_$planetKey")?.length() ?: 0

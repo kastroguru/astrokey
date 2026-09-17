@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.kastroguru.astrodiary.data.InterpretationAssets
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.repository.BirthDataRepository
+import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.RulershipChain
 import eu.kastroguru.astrodiary.domain.interpretation.Bilingual
 import eu.kastroguru.astrodiary.domain.interpretation.NatalInterpretations
@@ -37,7 +38,7 @@ class ChartReadingViewModel @Inject constructor(
         val text: Bilingual,
         val kind: Kind,
     ) {
-        enum class Kind { WHO_YOU_ARE, IN_THE_WORLD }
+        enum class Kind { WHO_YOU_ARE, HOW_IT_SHOWS, IN_THE_WORLD }
     }
 
     data class State(
@@ -73,6 +74,17 @@ class ChartReadingViewModel @Inject constructor(
             sections += Section("asc", ascSign, null, null, null, it, Section.Kind.WHO_YOU_ARE)
         }
 
+        // How each body shows: the sign it wears and the house it stands in. Written for all
+        // fourteen bodies the chart plots, so nothing here falls back to composition.
+        for (key in longitudes.keys) {
+            val lon = norm(longitudes.getValue(key))
+            val sign = ZodiacSign.fromDegree(lon)
+            val house = AstroCalculator.planetHouse(lon, cusps)
+            written.placement(key, house, sign.englishName)?.let {
+                sections += Section(key, sign, house, null, null, it, Section.Kind.HOW_IT_SHOWS)
+            }
+        }
+
         // How each body plays out, and where it is actually decided. A written text wins; the
         // composed one is the stand-in until this body's combinations are all written.
         for (key in longitudes.keys) {
@@ -98,6 +110,11 @@ class ChartReadingViewModel @Inject constructor(
         "sun" to e.sunD, "moon" to e.moonD, "mercury" to e.mercuryD, "venus" to e.venusD,
         "mars" to e.marsD, "jupiter" to e.jupiterD, "saturn" to e.saturnD, "uranus" to e.uranusD,
         "neptune" to e.neptuneD, "pluto" to e.plutoD, "chiron" to e.chironD, "rahu" to e.rahuD,
+        // Ketu is never stored: it sits exactly opposite Rahu, so it is derived rather than kept
+        // in the row. It is read here but deliberately stays out of `Planet`, which drives the
+        // wheel and the transit scan — a point that is always opposite another would put a
+        // permanent opposition into every chart.
+        "ketu" to norm(e.rahuD + 180.0),
         "lilith" to e.lilithD,
     )
 

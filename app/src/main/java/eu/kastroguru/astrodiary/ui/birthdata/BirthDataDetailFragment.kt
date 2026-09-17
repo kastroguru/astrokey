@@ -101,6 +101,13 @@ class BirthDataDetailFragment : Fragment() {
             )
         }
 
+        binding.buttonSynastry.setOnClickListener {
+            findNavController().navigate(
+                R.id.synastryFragment,
+                Bundle().apply { putLong("birthDataId", id) }
+            )
+        }
+
         binding.buttonViewTable.setOnClickListener {
             findNavController().navigate(
                 R.id.action_birthDataDetailFragment_to_planetTableFragment,
