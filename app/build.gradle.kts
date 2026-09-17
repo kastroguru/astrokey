@@ -22,8 +22,8 @@ android {
         applicationId = "eu.kastroguru.astrokey"   // Google Play identity for "Astro Key"
         minSdk = 21
         targetSdk = 36   // Android 16 — Google Play target-API requirement (deadline 31.08.2026)
-        versionCode = 7
-        versionName = "1.5"
+        versionCode = 8
+        versionName = "1.5.1"
     }
 
     buildFeatures {
