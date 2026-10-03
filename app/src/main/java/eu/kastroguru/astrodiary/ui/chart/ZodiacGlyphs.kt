@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import eu.kastroguru.astrodiary.domain.model.Element
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 
 /**
@@ -15,6 +16,36 @@ import eu.kastroguru.astrodiary.domain.model.ZodiacSign
  * target position first.
  */
 object ZodiacGlyphs {
+
+    /** Element colours — the sign ring, the sign badges, planet glyphs and cusps all use these. */
+    fun elementColor(element: Element): Int = when (element) {
+        Element.FIRE  -> FIRE
+        Element.EARTH -> EARTH
+        Element.WATER -> WATER
+        Element.AIR   -> AIR
+    }
+
+    private val FIRE  = Color.parseColor("#CC3300")  // brick red
+    private val EARTH = Color.parseColor("#2A1506")  // very dark brown, near black
+    private val WATER = Color.parseColor("#1144CC")  // medium blue
+    private val AIR   = Color.parseColor("#C09500")  // gold
+
+    /** Glyph half-size as a share of the badge radius — the widest glyphs still stay on the disc. */
+    private const val GLYPH_IN_BADGE = 0.92f
+    private val discPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+
+    /**
+     * A sign badge: a disc in the sign's element colour with the white glyph on it. Replaces the
+     * emoji ♈…♓, whose colours have nothing to do with the element (Pisces comes out red).
+     */
+    fun drawBadge(canvas: Canvas, sign: ZodiacSign, cx: Float, cy: Float, radius: Float) {
+        discPaint.color = elementColor(sign.element)
+        canvas.drawCircle(cx, cy, radius, discPaint)
+        canvas.save()
+        canvas.translate(cx, cy)
+        draw(canvas, sign, radius * GLYPH_IN_BADGE)
+        canvas.restore()
+    }
 
     fun draw(canvas: Canvas, sign: ZodiacSign, s: Float, color: Int = Color.WHITE) {
         val sw = maxOf(3f, s * 0.17f)

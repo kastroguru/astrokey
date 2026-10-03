@@ -11,6 +11,8 @@ import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 import kotlin.math.max
+import eu.kastroguru.astrodiary.domain.model.ZodiacSign
+import eu.kastroguru.astrodiary.ui.chart.ZodiacGlyphs
 
 /**
  * Gallery thumbnail for an event. The base is either the uploaded photo (center-cropped) or — when
@@ -28,8 +30,8 @@ class EventThumbnailView @JvmOverloads constructor(
         val aspectSymbol: String, val aspectColor: Int,
         /** The aspect in words ("тригон"), so the cell reads without knowing the glyphs. */
         val aspectLabel: String,
-        val sunSign: String, val sunColor: Int,
-        val moonSign: String, val moonColor: Int,
+        val sunSign: ZodiacSign?, val sunColor: Int,
+        val moonSign: ZodiacSign?, val moonColor: Int,
         val city: String, val datetime: String,
     )
 
@@ -67,12 +69,14 @@ class EventThumbnailView @JvmOverloads constructor(
 
             // A side "glyph" can be the word "Asc"/"MC" instead of a single symbol, which is ~3x
             // wider and used to be clipped at the cell edge — shrink the row until both sides fit.
+            // The budget is what lies between a side glyph's centre and the cell edge, less a margin;
+            // a fixed 40 % of the width let "Asc" run 2 % short of the edge, under the rounded corner.
+            val gap = w * 0.28f
             glyphPaint.textSize = w * 0.26f
-            val heroBudget = w * 0.40f
+            val heroBudget = 2 * (w / 2f - gap - w * 0.06f)
             val widest = max(glyphPaint.measureText(d.glyphA), glyphPaint.measureText(d.glyphB))
             if (widest > heroBudget) glyphPaint.textSize = w * 0.26f * (heroBudget / widest)
             val heroY = h * 0.30f - (glyphPaint.descent() + glyphPaint.ascent()) / 2f
-            val gap = w * 0.28f
             glyphPaint.color = d.colorA
             canvas.drawText(d.glyphA, w / 2f - gap, heroY, glyphPaint)
             glyphPaint.color = d.colorB
@@ -93,16 +97,26 @@ class EventThumbnailView @JvmOverloads constructor(
 
         val sz = w * 0.105f
         glyphPaint.textSize = sz
-        // Signs line: ☉<sign> on the left half, ☽<sign> on the right half.
-        glyphPaint.color = d.sunColor
-        canvas.drawText("☉ ${d.sunSign}", w * 0.30f, h * 0.78f, glyphPaint)
-        glyphPaint.color = d.moonColor
-        canvas.drawText("☽ ${d.moonSign}", w * 0.70f, h * 0.78f, glyphPaint)
+        // Signs line: ☉<sign badge> on the left half, ☽<sign badge> on the right half.
+        drawBodyInSign(canvas, "☉", d.sunColor, d.sunSign, w * 0.30f, h * 0.78f, sz)
+        drawBodyInSign(canvas, "☽", d.moonColor, d.moonSign, w * 0.70f, h * 0.78f, sz)
         // City + date-time, white.
         glyphPaint.color = Color.WHITE
         canvas.drawText(ellipsize(d.city, glyphPaint, w * 0.94f), w / 2f, h * 0.89f, glyphPaint)
         glyphPaint.textSize = w * 0.092f
         canvas.drawText(ellipsize(d.datetime, glyphPaint, w * 0.94f), w / 2f, h * 0.985f, glyphPaint)
+    }
+
+    /** Body glyph followed by our sign badge, the pair centred on [cx]. */
+    private fun drawBodyInSign(canvas: Canvas, glyph: String, color: Int, sign: ZodiacSign?, cx: Float, baseline: Float, sz: Float) {
+        glyphPaint.color = color
+        val r = sz * 0.5f
+        val gap = sz * 0.25f
+        val gw = glyphPaint.measureText(glyph)
+        val total = gw + if (sign != null) gap + 2 * r else 0f
+        val left = cx - total / 2
+        canvas.drawText(glyph, left + gw / 2, baseline, glyphPaint)
+        if (sign != null) ZodiacGlyphs.drawBadge(canvas, sign, left + gw + gap + r, baseline - sz * 0.35f, r)
     }
 
     private fun ellipsize(text: String, paint: Paint, maxWidth: Float): String {

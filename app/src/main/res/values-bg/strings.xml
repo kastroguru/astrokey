@@ -69,6 +69,8 @@
 
     <!-- Transit chart -->
     <string name="house_row_label">дом</string>
+    <string name="strip_label_transit">Транзит</string>
+    <string name="strip_label_natal">Натал</string>
     <string name="active_aspects">Активни аспекти</string>
     <string name="refresh_now">↻ Сега</string>
     <string name="now_live_label"> (сега)</string>

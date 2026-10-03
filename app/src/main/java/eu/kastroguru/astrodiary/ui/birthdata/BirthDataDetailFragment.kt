@@ -14,6 +14,7 @@ import eu.kastroguru.astrodiary.databinding.FragmentBirthDataDetailBinding
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import eu.kastroguru.astrodiary.ui.chart.ChartViewModel
 import kotlinx.coroutines.launch
+import eu.kastroguru.astrodiary.ui.chart.withSignBadges
 
 @AndroidEntryPoint
 class BirthDataDetailFragment : Fragment() {
@@ -73,7 +74,7 @@ class BirthDataDetailFragment : Fragment() {
                     val min = ((inSign - deg) * 60).toInt()
                     "H%-2d %s %2d°%02d'".format(i + 1, sign.symbol, deg, min)
                 }.joinToString("\n")
-                binding.textCusps.text = cuspText
+                binding.textCusps.text = withSignBadges(cuspText)
             }
         }
 

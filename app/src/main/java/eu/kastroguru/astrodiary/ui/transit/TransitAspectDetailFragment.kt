@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import eu.kastroguru.astrodiary.ui.chart.withSignBadges
 
 @AndroidEntryPoint
 class TransitAspectDetailFragment : Fragment() {
@@ -107,8 +108,8 @@ class TransitAspectDetailFragment : Fragment() {
             val s = ZodiacSign.fromId(((tTransPos / 30.0).toInt() % 12) + 1)
             "${s.symbol} ${s.localizedName(requireContext())}"
         } else ""
-        binding.tvAspectDetail.text =
-            "${tPlanet?.localizedName(requireContext()) ?: state.focusTransitKey} $tSignLabel  ✦  ${natal.name}: ${nPlanet?.localizedName(requireContext()) ?: state.focusNatalKey} $nSignLabel"
+        binding.tvAspectDetail.text = withSignBadges(
+            "${tPlanet?.localizedName(requireContext()) ?: state.focusTransitKey} $tSignLabel  ✦  ${natal.name}: ${nPlanet?.localizedName(requireContext()) ?: state.focusNatalKey} $nSignLabel")
 
         // ── Legend ────────────────────────────────────────────────────────────
         binding.tvLegendNatal.text   = getString(R.string.legend_natal_aspects, nPlanet?.localizedName(requireContext()) ?: state.focusNatalKey)

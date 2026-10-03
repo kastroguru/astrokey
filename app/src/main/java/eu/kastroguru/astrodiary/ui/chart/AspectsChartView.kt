@@ -20,15 +20,17 @@ import kotlin.math.min
 /**
  * Transit visualization as a linear "aspectarian grid":
  *
- *   [sign glyph]          ← top-most, per transit planet
- *   [house number]
+ *   [sign badge]          ← top-most, per transit planet (ZodiacGlyphs, never the emoji)
+ *   [house number]       ← inside a small house outline, so it never reads as a degree
  *   ──── TRANSIT PLANETS ─ 0°────────────15°────────────30° ────
  *                                aspect lines
  *   ──── NATAL PLANETS ─── 0°────────────15°────────────30° ────
  *   [house number]
  *   [sign glyph]          ← bottom-most, per natal planet
  *
- * Planets are placed on the 0–30° scale (degree within their sign).
+ * Every planet has a coloured tick on the axis at its exact position within its sign (0–30°), and the
+ * aspect lines start from that tick. Crowded labels are spread sideways to stay legible, and a thin
+ * connector runs from each label to its own tick, so the label never has to sit on its degree.
  * Aspect lines are drawn only for aspects with orb ≤ 2°.
  */
 class AspectsChartView @JvmOverloads constructor(
@@ -64,12 +66,7 @@ class AspectsChartView @JvmOverloads constructor(
     private val aspSymbols = mapOf(0 to "☌", 60 to "✶", 90 to "□", 120 to "△", 150 to "⚻", 180 to "☍")
 
     // Element colours
-    private fun elemColor(e: Element) = when (e) {
-        Element.FIRE  -> Color.parseColor("#CC3300")
-        Element.EARTH -> Color.parseColor("#2A1506")
-        Element.WATER -> Color.parseColor("#1144CC")
-        Element.AIR   -> Color.parseColor("#C09500")
-    }
+    private fun elemColor(e: Element) = ZodiacGlyphs.elementColor(e)
 
     // ── Computed layout data ──────────────────────────────────────────────────
     private data class PlanetEntry(
@@ -80,8 +77,11 @@ class AspectsChartView @JvmOverloads constructor(
         val house: Int,
         val absoluteDeg: Double,
         val elemColor: Int,
-        var displayDeg: Double = 0.0  // adjusted for overlaps (0–30)
-    )
+        var shown: Double = 0.0  // where the label is drawn (0–30); differs from pos only when crowded
+    ) {
+        /** Exact position within the sign (0–30) — where the tick and the aspect lines sit. */
+        val pos: Double get() = absoluteDeg.mod(30.0)
+    }
 
     private data class AspectEntry(
         val tIdx: Int,   // index in transitEntries
@@ -107,6 +107,13 @@ class AspectsChartView @JvmOverloads constructor(
     private val housePnt  = mk { textAlign = Paint.Align.CENTER; color = Color.parseColor("#555555") }
     private val aspSymPnt = mk { textAlign = Paint.Align.CENTER; color = Color.WHITE }
     private val aspBgPnt  = mk { style = Paint.Style.FILL }
+    private val leadPnt   = mk { style = Paint.Style.STROKE; strokeWidth = 1.6f; strokeCap = Paint.Cap.ROUND }
+    private val tickPnt   = mk { style = Paint.Style.STROKE; strokeWidth = 3.5f }
+    private val dotPnt    = mk { style = Paint.Style.FILL }
+    private val houseLinePnt = mk { style = Paint.Style.STROKE; strokeWidth = 1.5f; color = Color.parseColor("#8C8AA0") }
+    private val houseFillPnt = mk { style = Paint.Style.FILL; color = Color.parseColor("#FAF9FE") }
+    private val housePath    = Path()
+    private val captionPnt   = mk { color = Color.parseColor("#555555"); isFakeBoldText = true; textAlign = Paint.Align.LEFT }
 
     /** Call this whenever settings change (e.g. on fragment resume). */
     fun refreshSettings() { rebuild() }
@@ -139,8 +146,7 @@ class AspectsChartView @JvmOverloads constructor(
                     signId      = pos.sign,
                     house       = pos.house,
                     absoluteDeg = pos.absoluteDegree,
-                    elemColor   = elemColor(sign.element),
-                    displayDeg  = pos.degreeInSign.toDouble()
+                    elemColor   = elemColor(sign.element)
                 )
             }
 
@@ -161,14 +167,13 @@ class AspectsChartView @JvmOverloads constructor(
                 signId      = signId,
                 house       = house,
                 absoluteDeg = absD,
-                elemColor   = elemColor(sign.element),
-                displayDeg  = deg.toDouble()
+                elemColor   = elemColor(sign.element)
             )
         }
 
-        // Resolve overlaps (1-D collision on 0–30 scale)
-        resolveLinear(transitEntries)
-        resolveLinear(natalEntries)
+        // Spread crowded labels; ticks and aspect lines stay on the exact degree
+        spreadLabels(transitEntries)
+        spreadLabels(natalEntries)
 
         // ── Aspects (≤ ORB_MAX degrees) ──
         val aspects = mutableListOf<AspectEntry>()
@@ -191,19 +196,27 @@ class AspectsChartView @JvmOverloads constructor(
         requestLayout()
     }
 
-    /** Spread overlapping planet entries on the 0–30 linear scale. */
-    private fun resolveLinear(entries: List<PlanetEntry>, minGap: Double = 1.2) {
-        val sorted = entries.sortedBy { it.deg.toDouble() }.toMutableList()
-        // Simple forward pass
-        for (i in 1 until sorted.size) {
-            if (sorted[i].displayDeg - sorted[i - 1].displayDeg < minGap) {
-                sorted[i].displayDeg = sorted[i - 1].displayDeg + minGap
-            }
+    /**
+     * Sets where each label is drawn. A label is the column of planet glyph, house number and sign
+     * glyph, so its width is the widest of the three. Every size in this view is a fraction of the
+     * view's width, so a label's width in degrees is the same at any width — it is measured once at
+     * a nominal one.
+     */
+    private fun spreadLabels(entries: List<PlanetEntry>) {
+        val w = 1000f
+        val pxPerDeg = w * (1f - H_MARGIN_LEFT - H_MARGIN_RIGHT) / 30f
+        val m = Paint(Paint.ANTI_ALIAS_FLAG)
+        fun width(text: String, scale: Float) = m.apply { textSize = w * scale }.measureText(text)
+        val half = entries.map { e ->
+            val px = maxOf(
+                width(e.planet.glyph, FONT_SCALE),
+                w * HOUSE_BOX,
+                w * SIGN_SCALE * BADGE_R * 2
+            ) + w * FONT_SCALE * LABEL_PAD
+            px / 2.0 / pxPerDeg
         }
-        // Clamp to 0–30 (shift back if overflowed)
-        val overflow = (sorted.lastOrNull()?.displayDeg ?: 0.0) - 29.5
-        if (overflow > 0) sorted.forEach { it.displayDeg -= overflow }
-        sorted.forEach { it.displayDeg = it.displayDeg.coerceIn(0.0, 29.5) }
+        val shown = spreadAround(entries.map { it.pos }, half, 0.0, 30.0)
+        entries.forEachIndexed { i, e -> e.shown = shown[i] }
     }
 
     private fun planetHouse(deg: Double, cusps: List<Double>): Int {
@@ -224,12 +237,14 @@ class AspectsChartView @JvmOverloads constructor(
     }
 
     private fun computeHeight(w: Float): Float {
-        val fs = w * FONT_SCALE; val fsSign = w * SIGN_SCALE; val fsHouse = w * HOUSE_SCALE
-        val gap = w * 0.012f
+        val fs = w * FONT_SCALE; val fsSign = w * SIGN_SCALE; val houseH = w * HOUSE_BOX * 1.5f
+        val gap = w * GAP_SCALE
+        val lead = w * (LEAD_SCALE + TICK_SCALE)
         return PADDING_TOP * w +
-                fsSign + gap + fsHouse + gap + fs + gap +  // transit block (above top line)
-                w * INNER_HEIGHT_RATIO +                   // interior / aspect lines
-                gap + fs + gap + fsHouse + gap + fsSign +  // natal block (below bottom line)
+                fsSign + gap + houseH + gap + fs + fs * GLYPH_BELOW + lead +   // transit block + connectors
+                w * INNER_HEIGHT_RATIO +                                       // interior / aspect lines
+                lead + fs * GLYPH_ABOVE + gap + fs * GLYPH_DESCENT + houseH +  // connectors + natal block
+                gap + fsSign +
                 PADDING_BOT * w
     }
 
@@ -237,18 +252,28 @@ class AspectsChartView @JvmOverloads constructor(
     private val FONT_SCALE       = 0.048f   // glyph font = w * this
     private val SIGN_SCALE       = 0.038f
     private val HOUSE_SCALE      = 0.034f
+    private val BADGE_R          = 0.55f    // sign badge radius, × SIGN_SCALE font
+    private val HOUSE_BOX        = 0.044f   // side of the house outline's square; the roof adds half of it
+    private val HOUSE_NUM        = 0.85f    // house number font, × HOUSE_SCALE — "12" has to fit the square
     private val ASP_SYM_SCALE    = 0.030f
     private val PADDING_TOP      = 0.04f    // fraction of width
     private val PADDING_BOT      = 0.04f
     private val H_MARGIN_LEFT    = 0.12f    // left margin — wider to fit orb scale labels
     private val H_MARGIN_RIGHT   = 0.04f    // right margin — just a small gutter
     private val INNER_HEIGHT_RATIO= 0.55f   // aspect area / width
+    private val GAP_SCALE        = 0.012f   // gap between rows of one label
+    private val LABEL_PAD        = 0.10f    // horizontal clearance between labels, × glyph font
+    private val TICK_SCALE       = 0.028f   // planet tick on the axis — longer than the 20px ruler ticks
+    private val LEAD_SCALE       = 0.036f   // height of the slanted connector from label to tick
+    private val GLYPH_BELOW      = 0.25f    // transit glyph: baseline → where its connector starts, × font
+    private val GLYPH_ABOVE      = 0.95f    // natal glyph: where its connector ends → baseline, × font
+    private val GLYPH_DESCENT    = 0.15f    // natal glyph: baseline → the roof of the house below it, × font
 
-    private fun xForDeg(displayDeg: Double, w: Float): Float {
+    private fun xForDeg(deg: Double, w: Float): Float {
         val lm = w * H_MARGIN_LEFT
         val rm = w * H_MARGIN_RIGHT
         val available = w - lm - rm
-        return (lm + (displayDeg / 30.0) * available).toFloat()
+        return (lm + (deg / 30.0) * available).toFloat()
     }
 
     // ── Draw ──────────────────────────────────────────────────────────────────
@@ -261,23 +286,29 @@ class AspectsChartView @JvmOverloads constructor(
         val fsSign  = w * SIGN_SCALE
         val fsHouse = w * HOUSE_SCALE
         val fsSym   = w * ASP_SYM_SCALE
-        val gap     = w * 0.012f
+        val gap     = w * GAP_SCALE
         val padTop  = PADDING_TOP * w
         val lm      = w * H_MARGIN_LEFT
         val rm      = w * H_MARGIN_RIGHT
+        val tickH   = w * TICK_SCALE
+        val lead    = w * (LEAD_SCALE + TICK_SCALE)
 
-        // Transit block ABOVE top line, natal block BELOW bottom line
+        // Transit block ABOVE top line, natal block BELOW bottom line; connectors in between
+        val box       = w * HOUSE_BOX
+        val houseH    = box * 1.5f                    // square + roof
         val signTopY  = padTop + fsSign
-        val houseTopY = signTopY + gap + fsHouse
-        val transitY  = houseTopY + gap + fs          // transit planet glyph baseline
-        val lineY_t   = transitY + gap + 2f            // ← TOP LINE
+        val houseBotT = signTopY + gap + houseH       // bottom edge of the transit house outlines
+        val transitY  = houseBotT + gap + fs          // transit planet glyph baseline
+        val leadT     = transitY + fs * GLYPH_BELOW   // transit connectors start here
+        val lineY_t   = leadT + lead                  // ← TOP LINE
 
         val innerH    = w * INNER_HEIGHT_RATIO
-        val lineY_n   = lineY_t + innerH               // ← BOTTOM LINE
+        val lineY_n   = lineY_t + innerH              // ← BOTTOM LINE
 
-        val natalY    = lineY_n + gap + fs             // natal planet glyph baseline
-        val houseNatY = natalY + gap + fsHouse
-        val signNatY  = houseNatY + gap + fsSign
+        val leadN     = lineY_n + lead                // natal connectors end here
+        val natalY    = leadN + fs * GLYPH_ABOVE      // natal planet glyph baseline
+        val houseBotN = natalY + gap + fs * GLYPH_DESCENT + houseH  // bottom edge of the natal house outlines
+        val signNatY  = houseBotN + gap + fsSign
 
         // ── Dark backgrounds ──────────────────────────────────────────────────
         val darkBg   = Color.parseColor("#F0EFF6")  // light lavender (matches app surface)
@@ -337,8 +368,8 @@ class AspectsChartView @JvmOverloads constructor(
         for (asp in aspectEntries) {
             val t  = transitEntries[asp.tIdx]
             val n  = natalEntries[asp.nIdx]
-            val x1 = xForDeg(t.displayDeg, w)
-            val x2 = xForDeg(n.displayDeg, w)
+            val x1 = xForDeg(t.pos, w)
+            val x2 = xForDeg(n.pos, w)
             val alpha  = ((1.0 - asp.orb / ORB_MAX) * 180 + 75).toInt().coerceIn(75, 255)
             val strokeW = if (asp.orb < 0.5) 3.5f else if (asp.orb < 1.0) 2.8f else 2.2f
             val p = mk { color = asp.color; this.alpha = alpha; style = Paint.Style.STROKE; strokeWidth = strokeW }
@@ -355,52 +386,88 @@ class AspectsChartView @JvmOverloads constructor(
         }
 
         // ── Transit planets — ABOVE top line ─────────────────────────────────
-        glyphPnt.textSize = fs; signPnt.textSize = fsSign; housePnt.textSize = fsHouse
-        // House row border lines + "дом" label (transit side)
+        glyphPnt.textSize = fs; signPnt.textSize = fsSign; housePnt.textSize = fsHouse * HOUSE_NUM
+        // House row border lines + "дом" label, level with the numbers (transit side)
         val rowBorderPnt = mk { style = Paint.Style.STROKE; strokeWidth = 0.9f; color = Color.parseColor("#BBBBBB") }
-        val rowLblPnt    = mk { textSize = fsHouse * 0.72f; color = Color.parseColor("#AAAAAA"); textAlign = Paint.Align.LEFT }
-        val hRowTop_t = houseTopY - fsHouse * 1.0f
-        val hRowBot_t = houseTopY + fsHouse * 0.4f
-        canvas.drawLine(0f, hRowTop_t, w, hRowTop_t, rowBorderPnt)
-        canvas.drawLine(0f, hRowBot_t, w, hRowBot_t, rowBorderPnt)
-        canvas.drawText(context.getString(R.string.house_row_label), 4f, houseTopY, rowLblPnt)
+        val rowLblPnt    = mk { textSize = fsHouse * 0.8f; color = Color.parseColor("#777777"); textAlign = Paint.Align.LEFT }
+        val houseLabel   = context.getString(R.string.house_row_label)
+        fun houseRow(bottom: Float) {
+            val top = bottom - houseH - gap * 0.4f
+            canvas.drawLine(0f, top, w, top, rowBorderPnt)
+            canvas.drawLine(0f, bottom + gap * 0.4f, w, bottom + gap * 0.4f, rowBorderPnt)
+            canvas.drawText(houseLabel, 4f, bottom - box / 2 + rowLblPnt.textSize * 0.36f, rowLblPnt)
+        }
+        houseRow(houseBotT)
 
         for (e in transitEntries) {
-            val x = xForDeg(e.displayDeg, w)
-            signPnt.color = elemColor(ZodiacSign.fromId(e.signId).element)
-            canvas.drawText(ZodiacSign.fromId(e.signId).symbol, x, signTopY, signPnt)
-            housePnt.color = Color.parseColor("#555555")
-            canvas.drawText("${e.house}", x, houseTopY, housePnt)
+            val x = xForDeg(e.shown, w)
+            ZodiacGlyphs.drawBadge(canvas, ZodiacSign.fromId(e.signId), x, signTopY - fsSign * 0.38f, fsSign * BADGE_R)
+            drawHouse(canvas, x, houseBotT, box, e.house)
             glyphPnt.color = e.elemColor
             canvas.drawText(e.planet.glyph, x, transitY, glyphPnt)
-            val dot = mk { color = e.elemColor; style = Paint.Style.FILL }
-            canvas.drawCircle(x, lineY_t, 3.5f, dot)
+            drawLead(canvas, e.elemColor, x, leadT, xForDeg(e.pos, w), lineY_t - tickH, lineY_t)
         }
 
         // ── Natal planets — BELOW bottom line ─────────────────────────────────
         // House row border lines + "дом" label (natal side)
-        val hRowTop_n = houseNatY - fsHouse * 1.0f
-        val hRowBot_n = houseNatY + fsHouse * 0.4f
-        canvas.drawLine(0f, hRowTop_n, w, hRowTop_n, rowBorderPnt)
-        canvas.drawLine(0f, hRowBot_n, w, hRowBot_n, rowBorderPnt)
-        canvas.drawText(context.getString(R.string.house_row_label), 4f, houseNatY, rowLblPnt)
+        houseRow(houseBotN)
+
+        // "Транзит" / "Натал" in the left margin beside each connector band. Connectors never reach
+        // the margin (labels are kept within 0–30°), and the orb scale's 2,0 / 0,0 sit on the axis
+        // lines, so the band keeps clear of both.
+        val clear = fsHouse * 0.6f
+        drawRowCaption(canvas, context.getString(R.string.strip_label_transit), (leadT + lineY_t - clear) / 2, lm, fsHouse)
+        drawRowCaption(canvas, context.getString(R.string.strip_label_natal), (lineY_n + clear + leadN) / 2, lm, fsHouse)
 
         natalHitBoxes.clear()
         glyphPnt.textSize = fs
         for (e in natalEntries) {
-            val x = xForDeg(e.displayDeg, w)
+            val x = xForDeg(e.shown, w)
             glyphPnt.color = e.elemColor
             canvas.drawText(e.planet.glyph, x, natalY, glyphPnt)
-            housePnt.color = Color.parseColor("#555555")
-            canvas.drawText("${e.house}", x, houseNatY, housePnt)
-            signPnt.color = elemColor(ZodiacSign.fromId(e.signId).element)
-            canvas.drawText(ZodiacSign.fromId(e.signId).symbol, x, signNatY, signPnt)
-            // Dot on the bottom line at planet position
-            val dot = mk { color = e.elemColor; style = Paint.Style.FILL }
-            canvas.drawCircle(x, lineY_n, 3.5f, dot)
+            drawHouse(canvas, x, houseBotN, box, e.house)
+            ZodiacGlyphs.drawBadge(canvas, ZodiacSign.fromId(e.signId), x, signNatY - fsSign * 0.38f, fsSign * BADGE_R)
+            drawLead(canvas, e.elemColor, x, leadN, xForDeg(e.pos, w), lineY_n + tickH, lineY_n)
             // Hit box
             natalHitBoxes += android.graphics.RectF(x - fs*0.8f, natalY - fs, x + fs*0.8f, natalY + fs*0.4f) to e.planet
         }
+    }
+
+    /** Row caption centred on [yMid], shrunk if it would not fit the left margin [lm]. */
+    private fun drawRowCaption(canvas: Canvas, text: String, yMid: Float, lm: Float, fsHouse: Float) {
+        captionPnt.textSize = fsHouse * 0.85f
+        val room = lm - 10f
+        val width = captionPnt.measureText(text)
+        if (width > room) captionPnt.textSize *= room / width
+        canvas.drawText(text, 4f, yMid + captionPnt.textSize * 0.36f, captionPnt)
+    }
+
+    /**
+     * The house number inside a small house outline: a square of side [box] whose bottom edge is at
+     * [bottom], with a roof on the same base, half as high. Plain numbers here read as degrees.
+     */
+    private fun drawHouse(canvas: Canvas, x: Float, bottom: Float, box: Float, house: Int) {
+        val half = box / 2
+        housePath.reset()
+        housePath.moveTo(x - half, bottom)
+        housePath.lineTo(x - half, bottom - box)
+        housePath.lineTo(x, bottom - box - half)
+        housePath.lineTo(x + half, bottom - box)
+        housePath.lineTo(x + half, bottom)
+        housePath.close()
+        canvas.drawPath(housePath, houseFillPnt)
+        canvas.drawPath(housePath, houseLinePnt)
+        canvas.drawText("$house", x, bottom - half + housePnt.textSize * 0.36f, housePnt)
+    }
+
+    /**
+     * Joins a label at [x] to its exact degree [xe]: a thin connector from the label edge [yLabel]
+     * to the tick end [yTick], then the tick itself down (or up) to the axis at [yAxis].
+     */
+    private fun drawLead(canvas: Canvas, color: Int, x: Float, yLabel: Float, xe: Float, yTick: Float, yAxis: Float) {
+        leadPnt.color = color; canvas.drawLine(x, yLabel, xe, yTick, leadPnt)
+        tickPnt.color = color; canvas.drawLine(xe, yTick, xe, yAxis, tickPnt)
+        dotPnt.color = color;  canvas.drawCircle(xe, yAxis, 3.5f, dotPnt)
     }
 
         // ── Touch ─────────────────────────────────────────────────────────────────
@@ -416,4 +483,45 @@ class AspectsChartView @JvmOverloads constructor(
         }
         return true
     }
+}
+
+/**
+ * Spreads labels along a line so that neighbours do not overlap, moving each as little as possible.
+ * [pos] are the true centres and [half] the half-widths, in one unit; centres stay within [lo]..[hi].
+ * Returns the drawn centre of each label in input order. The order along the line never changes.
+ *
+ * A crowded run is laid shoulder to shoulder and centred on its members' true positions; runs that
+ * then touch are merged and centred again. Pushing a run one way only — what this replaced — shoved
+ * the last label of a five-planet pile-up more than 4° off; centring halves that and leaves a label
+ * with room around it exactly where it is.
+ */
+internal fun spreadAround(pos: List<Double>, half: List<Double>, lo: Double, hi: Double): DoubleArray {
+    class Run(val members: MutableList<Int>) {
+        var start = 0.0   // drawn centre of the first member
+        val offsets: DoubleArray get() {
+            val o = DoubleArray(members.size)
+            for (k in 1 until members.size) o[k] = o[k - 1] + half[members[k - 1]] + half[members[k]]
+            return o
+        }
+        fun place() {
+            val o = offsets
+            val centred = members.indices.sumOf { pos[members[it]] - o[it] } / members.size
+            start = centred.coerceAtMost(hi - o.last()).coerceAtLeast(lo)
+        }
+        val left get() = start - half[members.first()]
+        val right get() = start + offsets.last() + half[members.last()]
+    }
+
+    val runs = ArrayList<Run>()
+    for (i in pos.indices.sortedBy { pos[it] }) {
+        runs += Run(mutableListOf(i)).apply { place() }
+        while (runs.size >= 2 && runs[runs.size - 2].right > runs.last().left + 1e-9) {
+            val absorbed = runs.removeAt(runs.size - 1)
+            runs.last().members += absorbed.members
+            runs.last().place()
+        }
+    }
+    val shown = DoubleArray(pos.size)
+    for (r in runs) r.offsets.forEachIndexed { k, o -> shown[r.members[k]] = r.start + o }
+    return shown
 }

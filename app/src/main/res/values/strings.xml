@@ -69,6 +69,8 @@
 
     <!-- Transit chart -->
     <string name="house_row_label">House</string>
+    <string name="strip_label_transit">Transit</string>
+    <string name="strip_label_natal">Natal</string>
     <string name="active_aspects">Active Aspects</string>
     <string name="refresh_now">↻ Now</string>
     <string name="now_live_label"> (now)</string>

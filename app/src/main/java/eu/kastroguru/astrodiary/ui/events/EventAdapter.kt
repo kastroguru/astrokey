@@ -48,14 +48,14 @@ class EventAdapter(
         val a = asp?.pointA ?: "sun"
         val c = asp?.pointB ?: "moon"
         val datetime = "%04d-%02d-%02d  %02d:%02d".format(entity.year, entity.month, entity.day, entity.hour, entity.minutes)
-        fun signGlyph(id: Int) = try { ZodiacSign.fromId(id).symbol } catch (e: Exception) { "" }
+        fun sign(id: Int) = try { ZodiacSign.fromId(id) } catch (e: Exception) { null }
         return EventThumbnailView.Data(
             glyphA = glyphOf(a), colorA = PlanetColors.of(a),
             glyphB = glyphOf(c), colorB = PlanetColors.of(c),
             aspectSymbol = aspectSymbol(asp?.angle ?: 0), aspectColor = aspectColor(asp?.angle ?: 0),
             aspectLabel = EventAspectPhrase.aspectName(context, asp?.angle ?: 0),
-            sunSign = signGlyph(entity.sunS), sunColor = PlanetColors.of("sun"),
-            moonSign = signGlyph(entity.moonS), moonColor = PlanetColors.of("moon"),
+            sunSign = sign(entity.sunS), sunColor = PlanetColors.of("sun"),
+            moonSign = sign(entity.moonS), moonColor = PlanetColors.of("moon"),
             city = entity.city, datetime = datetime,
         )
     }

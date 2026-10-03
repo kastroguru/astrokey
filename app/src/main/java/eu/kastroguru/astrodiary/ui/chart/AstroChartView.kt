@@ -52,11 +52,6 @@ class AstroChartView @JvmOverloads constructor(
     private val C_AXIS      = Color.parseColor("#222222")
     private val C_HOUSE     = Color.parseColor("#777777")
     private val C_HOUSE_NUM = Color.parseColor("#444444")
-    // Element colours – used for sign ring text and planet glyphs
-    private val C_FIRE  = Color.parseColor("#CC3300")  // fire  – brick red
-    private val C_EARTH = Color.parseColor("#2A1506")  // earth – very dark brown (near black)
-    private val C_WATER = Color.parseColor("#1144CC")  // water – medium blue
-    private val C_AIR   = Color.parseColor("#C09500")  // air   – bluish-grey slate
     private val C_PLANET    = Color.parseColor("#1A1A3A")
     private val C_DEG       = Color.parseColor("#888888")
     private val C_TICK      = Color.parseColor("#999999")
@@ -68,8 +63,8 @@ class AstroChartView @JvmOverloads constructor(
     private val bandMask    = mk { color = C_BG;        style = Paint.Style.FILL }
     private val signLinePnt = mk { color = C_SIGN_LINE; style = Paint.Style.STROKE; strokeWidth = 1.5f }
     private val signTxtPnt  = mk { color = C_SIGN_TXT;  textAlign = Paint.Align.CENTER }
-    private val axisPnt     = mk { color = C_AXIS;      style = Paint.Style.STROKE; strokeWidth = 2.5f }
-    private val housePnt    = mk { color = C_HOUSE;     style = Paint.Style.STROKE; strokeWidth = 1.2f }
+    private val axisPnt     = mk { color = C_AXIS;      style = Paint.Style.STROKE; strokeWidth = 4.5f }
+    private val housePnt    = mk { color = C_HOUSE;     style = Paint.Style.STROKE; strokeWidth = 3f }
     private val houseNumPnt = mk { color = C_HOUSE_NUM; textAlign = Paint.Align.CENTER }
     private val planetPnt      = mk { color = C_PLANET;    textAlign = Paint.Align.CENTER }
     private val degPnt         = mk { color = C_DEG;       textAlign = Paint.Align.CENTER }
@@ -122,7 +117,10 @@ class AstroChartView @JvmOverloads constructor(
         return true
     }
 
-    override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, w)
+    override fun onMeasure(w: Int, h: Int) {
+        val width = MeasureSpec.getSize(w)
+        setMeasuredDimension(width, wheelHeight(width, resources))
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -172,164 +170,9 @@ class AstroChartView @JvmOverloads constructor(
             val (gx, gy) = pt(cx, cy, midR, chartAngle(i * 30.0 + 15.0, asc))
             canvas.save()
             canvas.translate(gx, gy)
-            drawSignGlyph(canvas, ZodiacSign.values()[i], glyphSize)
+            ZodiacGlyphs.draw(canvas, ZodiacSign.values()[i], glyphSize)
             canvas.restore()
         }
-    }
-
-    /**
-     * Draws the traditional astrological glyph for [sign] centred at (0,0) with half-size [s].
-     * Pure white strokes — no font, no emoji, no circular icon backgrounds.
-     */
-    private fun drawSignGlyph(canvas: Canvas, sign: ZodiacSign, s: Float) {
-        val sw = maxOf(3f, s * 0.17f)
-        val p  = mk { color = Color.WHITE; style = Paint.Style.STROKE; strokeWidth = sw; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }
-        val fp = mk { color = Color.WHITE; style = Paint.Style.FILL }
-        val path = android.graphics.Path()
-        val oval = android.graphics.RectF()
-
-        when (sign) {
-
-            // ── Aries ♈ ── Two symmetric upward dome-arcs from a center stem ──────────
-            // Left dome: CCW from East(0°) = goes North → correct upward dome.
-            // Right dome: CW from West(180°) = goes North → also correct upward dome.
-            ZodiacSign.ARIES -> {
-                canvas.drawLine(0f, 0f, 0f, s*0.45f, p)
-                oval.set(-s*0.5f, -s*0.4f, 0f, s*0.4f)   // center(-0.25, 0); right edge at (0,0)
-                canvas.drawArc(oval, 0f, -180f, false, p)  // CCW: right→North(top)→left ✓ upward
-                oval.set(0f, -s*0.4f, s*0.5f, s*0.4f)    // center(+0.25, 0); left edge at (0,0)
-                canvas.drawArc(oval, 180f, 180f, false, p) // CW: left→North(top)→right ✓ upward
-            }
-
-            // ── Taurus ♉ ── Circle + two outward horn arcs ── (WORKING — unchanged)
-            ZodiacSign.TAURUS -> {
-                canvas.drawCircle(0f, s*0.15f, s*0.4f, p)
-                path.moveTo(-s*0.28f, -s*0.22f); path.quadTo(-s*0.55f, -s*0.15f, -s*0.45f, -s*0.5f)
-                path.moveTo( s*0.28f, -s*0.22f); path.quadTo( s*0.55f, -s*0.15f,  s*0.45f, -s*0.5f)
-            }
-
-            // ── Gemini ♊ ── II with top & bottom bars ── (WORKING — unchanged)
-            ZodiacSign.GEMINI -> {
-                canvas.drawLine(-s*0.22f, -s*0.45f, -s*0.22f, s*0.45f, p)
-                canvas.drawLine( s*0.22f, -s*0.45f,  s*0.22f, s*0.45f, p)
-                canvas.drawLine(-s*0.44f, -s*0.45f,  s*0.44f, -s*0.45f, p)
-                canvas.drawLine(-s*0.44f,  s*0.45f,  s*0.44f,  s*0.45f, p)
-            }
-
-            // ── Cancer ♋ ──────────────────────────────────────────────────────────────
-            // Upper half: circle (left) + horizontal ")" semi-arc (right, ar = 2×cr)
-            // Lower half: exact mirror — "(" semi-arc (left) + circle (right)
-            // Arc open/flat side sits flush against the circle edge.
-            ZodiacSign.CANCER -> {
-                val cr = s * 0.18f   // circle radius
-                val ar = cr * 2f     // arc radius = 2× circle radius
-
-                // ── Upper element ──
-                // Circle centre at x = −cr so its right edge is at x = 0
-                // Arc ")" centre at x = 0 so its open/left side is at x = 0 (= circle right edge)
-                val ucy = -s * 0.26f
-                canvas.drawCircle(-cr, ucy, cr, p)
-                oval.set(-ar, ucy - ar, ar, ucy + ar)
-                canvas.drawArc(oval, 180f, 180f, false, p)     // rotated 90° CW: East→South→West = "⌣"
-
-                // ── Lower element (mirror) ──
-                val lcy = s * 0.26f
-                canvas.drawCircle(cr, lcy, cr, p)            // circle right of centre
-                oval.set(-ar, lcy - ar, ar, lcy + ar)
-                canvas.drawArc(oval, 180f, -180f, false, p)  // CCW: top→left→bottom = "("
-            }
-
-            // ── Leo ♌ ── Small circle + tail that sweeps HIGH up before hooking down ──────
-            ZodiacSign.LEO -> {
-                val cr = s*0.22f
-                canvas.drawCircle(-s*0.06f, s*0.22f, cr, p)
-                path.moveTo(-s*0.06f + cr, s*0.22f)            // right edge of circle
-                path.cubicTo(s*0.52f, -s*0.62f,                // C1: much higher up-right
-                             s*0.66f,  s*0.15f,                // C2: wide right, returning
-                             s*0.44f,  s*0.5f)                 // end: lower-right hook
-            }
-
-            // ── Virgo ♍ ── m-shape (3 strokes) + ρ-loop: curves RIGHT then sweeps up-right back ─
-            ZodiacSign.VIRGO -> {
-                val yT=-s*0.28f; val yM=-s*0.7f
-                val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                canvas.drawLine(x1, yT, x1, s*0.12f, p)
-                path.moveTo(x1, yT); path.cubicTo(x1, yM, x2, yM, x2, yT); path.lineTo(x2, s*0.12f)
-                path.moveTo(x2, yT); path.cubicTo(x2, yM, x3, yM, x3, yT); path.lineTo(x3, s*0.4f)
-                // Loop curves RIGHT-DOWN-LEFT-UP (opposite of previous): the P faces the other way
-                path.cubicTo(x3 - s*0.12f, s*0.56f,  x3 + s*0.35f, s*0.56f,  x3 + s*0.35f, s*0.3f)
-                path.cubicTo(x3 + s*0.35f, s*0.1f,   x3, s*0.1f,             x3, s*0.12f)
-            }
-
-            // ── Capricorn ♑ ── Same as Virgo but n-shaped humps (arches DOWN) ────────────
-            // n = downward arch; Virgo's m = upward arch.
-            // ── Libra ♎ ── Pronounced arch on base line + second bar ─────────────────
-            // Cubic bezier with both control points at -s*0.55f gives a clear arch.
-            ZodiacSign.LIBRA -> {
-                path.moveTo(-s*0.42f, 0f)
-                path.cubicTo(-s*0.42f, -s*0.55f, s*0.42f, -s*0.55f, s*0.42f, 0f)
-                canvas.drawPath(path, p); path.reset()
-                canvas.drawLine(-s*0.62f, 0f, s*0.62f, 0f, p)
-                canvas.drawLine(-s*0.58f, s*0.32f, s*0.58f, s*0.32f, p)
-            }
-
-            // ── Scorpio ♏ ── m-shape (3 strokes) + clearly extended stinger arrow ───────
-            ZodiacSign.SCORPIO -> {
-                val yT=-s*0.28f; val yM=-s*0.7f; val yB=s*0.1f
-                val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                canvas.drawLine(x1, yT, x1, yB, p)
-                path.moveTo(x1, yT); path.cubicTo(x1, yM, x2, yM, x2, yT); path.lineTo(x2, yB)
-                path.moveTo(x2, yT); path.cubicTo(x2, yM, x3, yM, x3, yT); path.lineTo(x3, s*0.35f)
-                // Arrow: long shaft so it stands clearly to the right of the glyph
-                val ae = x3 + s*0.42f   // arrow end (far right)
-                path.lineTo(ae, s*0.35f)
-                path.moveTo(ae - s*0.2f, s*0.18f)
-                path.lineTo(ae, s*0.35f)
-                path.lineTo(ae - s*0.2f, s*0.52f)
-            }
-
-            // ── Sagittarius ♐ ── (WORKING) ───────────────────────────────────────────
-            ZodiacSign.SAGITTARIUS -> {
-                canvas.drawLine(-s*0.38f, s*0.38f, s*0.42f, -s*0.42f, p)
-                canvas.drawLine(s*0.42f, -s*0.42f, s*0.15f, -s*0.42f, p)
-                canvas.drawLine(s*0.42f, -s*0.42f, s*0.42f, -s*0.15f, p)
-                canvas.drawLine(-s*0.18f, -s*0.18f, s*0.18f, s*0.18f, p)
-            }
-
-            // ── Capricorn ♑ ── Virgo code, left stroke removed ──────────────────────────
-            ZodiacSign.CAPRICORN -> {
-                val yT=-s*0.28f; val yM=-s*0.7f
-                val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                // canvas.drawLine(x1, yT, x1, s*0.12f, p)  ← removed
-                path.moveTo(x1, yT); path.cubicTo(x1, yM, x2, yM, x2, yT); path.lineTo(x2, s*0.12f)
-                path.moveTo(x2, yT); path.cubicTo(x2, yM, x3, yM, x3, yT); path.lineTo(x3, s*0.4f)
-                path.cubicTo(x3 - s*0.12f, s*0.56f, x3 + s*0.35f, s*0.56f, x3 + s*0.35f, s*0.3f)
-                path.cubicTo(x3 + s*0.35f, s*0.1f, x3, s*0.1f, x3, s*0.12f)
-            }
-
-            // ── Aquarius ♒ ── Two wavy horizontal lines (WORKING) ────────────────────
-            ZodiacSign.AQUARIUS -> {
-                for (y in listOf(-s*0.18f, s*0.18f)) {
-                    path.moveTo(-s*0.5f, y)
-                    path.quadTo(-s*0.25f, y - s*0.24f, 0f, y)
-                    path.quadTo( s*0.25f, y + s*0.24f, s*0.5f, y)
-                }
-            }
-
-            // ── Pisces ♓ ── Fish facing each other: ")" left, "(" right + horizontal bar ─
-            // Fish face INWARD: left fish body curves to RIGHT (toward center),
-            //                   right fish body curves to LEFT (toward center).
-            ZodiacSign.PISCES -> {
-                // xO ≈ r so the arc tips (−xO+r and xO−r) just meet at the centre — "touching faces"
-                val r = s*0.38f; val xO = s*0.48f
-                oval.set(-xO-r, -r, -xO+r, r)
-                canvas.drawArc(oval, 270f,  180f, false, p)  // ")" left fish, faces right (center)
-                oval.set( xO-r, -r,  xO+r, r)
-                canvas.drawArc(oval, 270f, -180f, false, p)  // "(" right fish, faces left (center)
-                canvas.drawLine(-s*0.58f, 0f, s*0.58f, 0f, p)
-            }
-        }
-        canvas.drawPath(path, p)
     }
 
     private fun drawHouseDivisions(canvas: Canvas, cx: Float, cy: Float, r: Float, asc: Double) {
@@ -337,7 +180,10 @@ class AstroChartView @JvmOverloads constructor(
         houseNumPnt.textSize = r * 0.044f
         for (i in 0 until 12) {
             val angle = chartAngle(cusps[i], asc)
-            spoke(canvas, cx, cy, r * R_SIGN_IN, r * R_HOUSE, angle, if (i % 3 == 0) axisPnt else housePnt)
+            // A cusp takes the colour of its sign's element; the four angles stay thicker
+            val pnt = if (i % 3 == 0) axisPnt else housePnt
+            pnt.color = elementColor(ZodiacSign.fromDegree(cusps[i].mod(360.0)).element)
+            spoke(canvas, cx, cy, r * R_SIGN_IN, r * R_HOUSE, angle, pnt)
             val mid = midBetween(cusps[i], cusps[(i + 1) % 12])
             val (hx, hy) = pt(cx, cy, r * R_HNUM, chartAngle(mid, asc))
             canvas.drawText("${i + 1}", hx, hy + houseNumPnt.textSize * 0.36f, houseNumPnt)
@@ -504,12 +350,8 @@ class AstroChartView @JvmOverloads constructor(
         return elementColor(element)
     }
 
-    private fun elementColor(element: eu.kastroguru.astrodiary.domain.model.Element): Int = when (element) {
-        eu.kastroguru.astrodiary.domain.model.Element.FIRE  -> C_FIRE
-        eu.kastroguru.astrodiary.domain.model.Element.EARTH -> C_EARTH
-        eu.kastroguru.astrodiary.domain.model.Element.WATER -> C_WATER
-        eu.kastroguru.astrodiary.domain.model.Element.AIR   -> C_AIR
-    }
+    private fun elementColor(element: eu.kastroguru.astrodiary.domain.model.Element): Int =
+        ZodiacGlyphs.elementColor(element)
 
     // ── Coordinate helpers ────────────────────────────────────────────────────
 
@@ -541,3 +383,12 @@ class AstroChartView @JvmOverloads constructor(
         return (a + d / 2.0) % 360.0
     }
 }
+
+/**
+ * Height of a round chart [width] wide: square, but never more than 80 % of the screen height.
+ * Squaring by width alone made the wheel taller than the viewport on a tablet in landscape — Android
+ * 16 ignores the portrait lock there — so only its top half showed. Phones in portrait are
+ * unaffected: their width is always the smaller side. The wheel is drawn centred in the box.
+ */
+internal fun wheelHeight(width: Int, res: android.content.res.Resources): Int =
+    min(width, (res.displayMetrics.heightPixels * 0.8f).toInt())

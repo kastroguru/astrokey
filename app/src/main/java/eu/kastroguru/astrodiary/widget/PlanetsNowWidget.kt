@@ -5,12 +5,15 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.util.TypedValue
 import android.widget.RemoteViews
 import eu.kastroguru.astrodiary.MainActivity
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.model.Planet
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
+import eu.kastroguru.astrodiary.ui.chart.signBadgeLineBitmap
 import java.util.Calendar
 import java.util.TimeZone
 import kotlin.math.roundToInt
@@ -46,24 +49,30 @@ class PlanetsNowWidget : AppWidgetProvider() {
                 // London as default location for "no ascendant" display
                 val astro = AstroCalculator(context.applicationContext).calculate(year, month, day, hour, 51.5, -0.1)
 
-                fun planetText(key: String, glyph: String): String {
-                    val pos = astro.planets[key] ?: return "$glyph –"
-                    val sign = try { ZodiacSign.fromId(pos.sign) } catch (e: Exception) { return "$glyph –" }
-                    return "$glyph${sign.symbol}${pos.degreeInSign}°"
+                // Each cell is a bitmap: a widget's text cannot carry our sign badge, and the emoji
+                // signs are never shown (their colours ignore the element).
+                val textPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics)
+                fun cell(id: Int, glyph: String, sign: ZodiacSign?, suffix: String, color: String) =
+                    views.setImageViewBitmap(id, signBadgeLineBitmap(glyph, sign, suffix, textPx, Color.parseColor(color)))
+                fun planetCell(id: Int, key: String, glyph: String, color: String) {
+                    val pos = astro.planets[key]
+                    val sign = pos?.let { try { ZodiacSign.fromId(it.sign) } catch (e: Exception) { null } }
+                    if (pos == null || sign == null) cell(id, "$glyph –", null, "", color)
+                    else cell(id, glyph, sign, "${pos.degreeInSign}°", color)
                 }
 
-                views.setTextViewText(R.id.widget_sun,     planetText("sun",     "☉"))
-                views.setTextViewText(R.id.widget_moon,    planetText("moon",    "☽"))
-                views.setTextViewText(R.id.widget_mercury, planetText("mercury", "☿"))
-                views.setTextViewText(R.id.widget_venus,   planetText("venus",   "♀"))
-                views.setTextViewText(R.id.widget_mars,    planetText("mars",    "♂"))
-                views.setTextViewText(R.id.widget_jupiter, planetText("jupiter", "♃"))
-                views.setTextViewText(R.id.widget_saturn,  planetText("saturn",  "♄"))
+                planetCell(R.id.widget_sun,     "sun",     "☉", "#FFD700")
+                planetCell(R.id.widget_moon,    "moon",    "☽", "#BBDDFF")
+                planetCell(R.id.widget_mercury, "mercury", "☿", "#CCCCCC")
+                planetCell(R.id.widget_venus,   "venus",   "♀", "#FF9EAD")
+                planetCell(R.id.widget_mars,    "mars",    "♂", "#E53935")
+                planetCell(R.id.widget_jupiter, "jupiter", "♃", "#FF9800")
+                planetCell(R.id.widget_saturn,  "saturn",  "♄", "#9090A0")
 
                 // ASC from cusps (index 0)
                 val ascDeg = astro.cusps.getOrElse(0) { 0.0 }
                 val ascSign = try { ZodiacSign.fromId((ascDeg / 30).toInt() + 1) } catch (e: Exception) { null }
-                views.setTextViewText(R.id.widget_asc, "↑${ascSign?.symbol ?: ""}${(ascDeg % 30).roundToInt()}°")
+                cell(R.id.widget_asc, "↑", ascSign, "${(ascDeg % 30).roundToInt()}°", "#4CAF50")
 
                 // Time label
                 val h = cal.get(Calendar.HOUR_OF_DAY)
@@ -71,7 +80,7 @@ class PlanetsNowWidget : AppWidgetProvider() {
                 views.setTextViewText(R.id.widget_time, "%02d:%02d UTC".format(h, m))
 
             } catch (e: Exception) {
-                views.setTextViewText(R.id.widget_sun, "Error")
+                views.setTextViewText(R.id.widget_time, "Error")
             }
 
             manager.updateAppWidget(widgetId, views)

@@ -68,8 +68,9 @@ class PrimaryDirectionsWheelView @JvmOverloads constructor(
     private val circPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 1.4f; color = Color.parseColor("#6E6A8C") }
     private val spokePnt = mk { style = Paint.Style.STROKE; strokeWidth = 1.2f; color = Color.parseColor("#8A86A8") }
     private val connPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 1.2f; color = Color.parseColor("#555273") }
-    private val axisPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 2.0f; color = Color.parseColor("#5E5B7A") }  // ASC/MC/IC/DESC
-    private val cuspPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 1.0f; color = Color.parseColor("#BCB8D2") }  // intermediate cusps
+    // Cusps take their sign's element colour (set per cusp), as on the natal wheel
+    private val axisPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 4.5f }  // ASC/MC/IC/DESC
+    private val cuspPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 3.0f }  // intermediate cusps
     private val houseNumPnt = mk { textAlign = Paint.Align.CENTER; color = Color.parseColor("#9591B0") }
     private val glyphPnt = mk { textAlign = Paint.Align.CENTER }
     private val markPnt  = mk {}
@@ -82,11 +83,14 @@ class PrimaryDirectionsWheelView @JvmOverloads constructor(
 
     private val hitBoxes = mutableListOf<Triple<Float, Float, String>>()
 
-    override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, w)
+    override fun onMeasure(w: Int, h: Int) {
+        val width = MeasureSpec.getSize(w)
+        setMeasuredDimension(width, wheelHeight(width, resources))
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val cx = width / 2f; val cy = width / 2f
+        val cx = width / 2f; val cy = height / 2f
         val r = min(cx, cy) * 0.96f
         if (r <= 0) return
         hitBoxes.clear()
@@ -120,7 +124,9 @@ class PrimaryDirectionsWheelView @JvmOverloads constructor(
             for (i in 0 until 12) {
                 val ang = chartAngle(houseCusps[i])
                 val isAxis = i == 0 || i == 3 || i == 6 || i == 9  // ASC / IC / DESC / MC
-                spoke(canvas, cx, cy, r * R_ASPECT, r * R_SIGN_IN, ang, if (isAxis) axisPnt else cuspPnt)
+                val pnt = if (isAxis) axisPnt else cuspPnt
+                pnt.color = ZodiacGlyphs.elementColor(ZodiacSign.fromDegree(houseCusps[i].mod(360.0)).element)
+                spoke(canvas, cx, cy, r * R_ASPECT, r * R_SIGN_IN, ang, pnt)
                 var span = houseCusps[(i + 1) % 12] - houseCusps[i]
                 if (span < 0) span += 360.0
                 val (nx, ny) = pt(cx, cy, r * (R_ASPECT - 0.052f), chartAngle(houseCusps[i] + span / 2.0))

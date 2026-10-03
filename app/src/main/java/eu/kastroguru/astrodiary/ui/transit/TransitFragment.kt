@@ -28,6 +28,7 @@ import eu.kastroguru.astrodiary.domain.model.Planet
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import eu.kastroguru.astrodiary.ui.chart.localizedName
 import kotlinx.coroutines.launch
+import eu.kastroguru.astrodiary.ui.chart.withSignBadges
 
 @AndroidEntryPoint
 class TransitFragment : Fragment() {
@@ -291,7 +292,7 @@ class TransitFragment : Fragment() {
                 val sign = try { ZodiacSign.fromId(pos.sign) } catch (e: Exception) { return@forEach }
                 sb.append("${planet.glyph}${sign.symbol}${pos.degreeInSign}°${pos.minutes}'  ")
             }
-            binding.tvTransitSummary.text = sb.toString()
+            binding.tvTransitSummary.text = withSignBadges(sb)
         }
 
         aspectAdapter.submitList(if (pd) pdAspectItems else state.aspects)

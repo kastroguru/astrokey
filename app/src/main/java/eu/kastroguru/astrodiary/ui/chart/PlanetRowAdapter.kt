@@ -45,7 +45,7 @@ class PlanetRowAdapter(
                 binding.textGlyph.text = row.glyph
             }
             binding.textPlanetName.text = row.planetName
-            binding.textSign.text = "${row.signGlyph} ${row.signName}"
+            binding.textSign.text = withSignBadges("${row.signGlyph} ${row.signName}")
             binding.textDegree.text = "%d°%02d'".format(row.degreeInSign, row.minutes)
             binding.textHouse.text = if (row.house > 0) row.house.toString() else ""
 

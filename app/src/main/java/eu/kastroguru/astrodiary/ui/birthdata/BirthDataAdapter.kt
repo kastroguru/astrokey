@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.databinding.ItemBirthDataBinding
-import eu.kastroguru.astrodiary.domain.model.Element
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import eu.kastroguru.astrodiary.ui.chart.localizedName
+import eu.kastroguru.astrodiary.ui.chart.SignBadgeDrawable
+import eu.kastroguru.astrodiary.ui.chart.withSignBadges
 
 class BirthDataAdapter(
     private val onClick: (BirthDataEntity) -> Unit,
@@ -36,33 +37,28 @@ class BirthDataAdapter(
             val sunSign = try { ZodiacSign.fromId(entity.sunS) } catch (e: Exception) { null }
             val moonSign = try { ZodiacSign.fromId(entity.moonS) } catch (e: Exception) { null }
 
-            // Badge: element color + sign glyph
-            b.textSignGlyph.text = sunSign?.symbol ?: "★"
-            val elementColor = elementColor(sunSign?.element)
-            val bg = b.viewSignBadge.background as? GradientDrawable
-                ?: GradientDrawable().also { b.viewSignBadge.background = it }
-            bg.shape = GradientDrawable.OVAL
-            bg.setColor(elementColor and 0x00FFFFFF or 0x55000000)
-            bg.setStroke(2, elementColor)
+            // Badge: our sun-sign badge; a neutral disc with a star when the sign is unknown
+            if (sunSign != null) {
+                b.viewSignBadge.background = SignBadgeDrawable(sunSign)
+                b.textSignGlyph.text = ""
+            } else {
+                b.viewSignBadge.background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(Color.parseColor("#5598A0BA")); setStroke(2, Color.parseColor("#98A0BA"))
+                }
+                b.textSignGlyph.text = "★"
+            }
 
             // Text: Sun in Aries · Moon in Taurus
             val signText = buildString {
                 sunSign?.let { append("☉ ${it.symbol} ${it.localizedName(b.root.context)}") }
                 moonSign?.let { append("  ☽ ${it.symbol} ${it.localizedName(b.root.context)}") }
             }
-            b.textSunSign.text = signText
+            b.textSunSign.text = withSignBadges(signText)
 
             b.root.setOnClickListener { onClick(entity) }
             b.root.setOnLongClickListener { onLongClick(entity); true }
         }
-    }
-
-    private fun elementColor(element: Element?): Int = when (element) {
-        Element.FIRE  -> Color.parseColor("#D94F4F")
-        Element.EARTH -> Color.parseColor("#5A9A6A")
-        Element.AIR   -> Color.parseColor("#4A8EC2")
-        Element.WATER -> Color.parseColor("#7B6FC9")
-        null          -> Color.parseColor("#98A0BA")
     }
 
     companion object {

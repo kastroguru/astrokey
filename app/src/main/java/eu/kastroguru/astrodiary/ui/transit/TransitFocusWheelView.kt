@@ -11,6 +11,8 @@ import eu.kastroguru.astrodiary.domain.model.Element
 import eu.kastroguru.astrodiary.domain.model.Planet
 import eu.kastroguru.astrodiary.domain.model.ZodiacSign
 import kotlin.math.*
+import eu.kastroguru.astrodiary.ui.chart.ZodiacGlyphs
+import eu.kastroguru.astrodiary.ui.chart.wheelHeight
 
 /**
  * Single-ring focused chart. Same layout as AstroChartView but showing two sets
@@ -130,7 +132,10 @@ class TransitFocusWheelView @JvmOverloads constructor(
     private fun angDist(a: Double, b: Double): Double { val d=((b-a+360.0)%360.0); return if(d>180.0) 360.0-d else d }
     private fun midBetween(a: Double, b: Double) = (a + ((b-a+360.0)%360.0)/2.0 + 360.0) % 360.0
 
-    override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, w)
+    override fun onMeasure(w: Int, h: Int) {
+        val width = MeasureSpec.getSize(w)
+        setMeasuredDimension(width, wheelHeight(width, resources))
+    }
 
     // ── Read aspect-body exclusions from settings (same prefs as every other chart) ──
     private fun buildExcluded(): Set<String> {
@@ -232,7 +237,7 @@ class TransitFocusWheelView @JvmOverloads constructor(
             spoke(canvas, cx, cy, R*R_SIGN_OUT, R*R_SIGN_IN, chartAngle(i*30.0, asc), linePnt)
             val (gx, gy) = pt(cx, cy, midR, chartAngle(i*30.0 + 15.0, asc))
             canvas.save(); canvas.translate(gx, gy)
-            drawSignGlyph(canvas, ZodiacSign.fromId(i + 1), glyphS)
+            ZodiacGlyphs.draw(canvas, ZodiacSign.fromId(i + 1), glyphS)
             canvas.restore()
         }
     }
@@ -240,11 +245,14 @@ class TransitFocusWheelView @JvmOverloads constructor(
     // ── House divisions ───────────────────────────────────────────────────────
     private fun drawHouseDivisions(canvas: Canvas, cx: Float, cy: Float, R: Float, asc: Double) {
         if (natalCusps.size < 12) return
-        val axisPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 2.0f; color = C_AXIS }
-        val housePnt = mk { style = Paint.Style.STROKE; strokeWidth = 1.0f; color = C_HOUSE_LINE }
+        // Cusps take their sign's element colour, as on the natal wheel
+        val axisPnt  = mk { style = Paint.Style.STROKE; strokeWidth = 4.5f }
+        val housePnt = mk { style = Paint.Style.STROKE; strokeWidth = 3.0f }
         val numPnt   = mk { textAlign = Paint.Align.CENTER; color = C_HOUSE_NUM; textSize = R * 0.044f }
         for (i in 0 until 12) {
-            spoke(canvas, cx, cy, R*R_SIGN_IN, R*R_HOUSE, chartAngle(natalCusps[i], asc), if (i%3==0) axisPnt else housePnt)
+            val pnt = if (i%3==0) axisPnt else housePnt
+            pnt.color = ZodiacGlyphs.elementColor(ZodiacSign.fromDegree(natalCusps[i].mod(360.0)).element)
+            spoke(canvas, cx, cy, R*R_SIGN_IN, R*R_HOUSE, chartAngle(natalCusps[i], asc), pnt)
             val mid = midBetween(natalCusps[i], natalCusps[(i+1)%12])
             val (hx, hy) = pt(cx, cy, R*R_HNUM, chartAngle(mid, asc))
             canvas.drawText("${i+1}", hx, hy + numPnt.textSize*0.36f, numPnt)
@@ -465,80 +473,4 @@ class TransitFocusWheelView @JvmOverloads constructor(
         return result.toList()
     }
 
-    // ── Custom-path sign glyphs (identical to AstroChartView) ─────────────────
-    private fun drawSignGlyph(canvas: Canvas, sign: ZodiacSign, s: Float) {
-        val sw = maxOf(3f, s * 0.17f)
-        val p  = mk { color=Color.WHITE; style=Paint.Style.STROKE; strokeWidth=sw; strokeCap=Paint.Cap.ROUND; strokeJoin=Paint.Join.ROUND }
-        val path = Path(); val oval = RectF()
-        when (sign) {
-            ZodiacSign.ARIES -> {
-                canvas.drawLine(0f,0f,0f,s*0.45f,p)
-                oval.set(-s*0.5f,-s*0.4f,0f,s*0.4f);  canvas.drawArc(oval,0f,-180f,false,p)
-                oval.set(0f,-s*0.4f,s*0.5f,s*0.4f);   canvas.drawArc(oval,180f,180f,false,p)
-            }
-            ZodiacSign.TAURUS -> {
-                canvas.drawCircle(0f,s*0.15f,s*0.4f,p)
-                path.moveTo(-s*0.28f,-s*0.22f); path.quadTo(-s*0.55f,-s*0.15f,-s*0.45f,-s*0.5f)
-                path.moveTo( s*0.28f,-s*0.22f); path.quadTo( s*0.55f,-s*0.15f, s*0.45f,-s*0.5f)
-            }
-            ZodiacSign.GEMINI -> {
-                canvas.drawLine(-s*0.22f,-s*0.45f,-s*0.22f,s*0.45f,p); canvas.drawLine(s*0.22f,-s*0.45f,s*0.22f,s*0.45f,p)
-                canvas.drawLine(-s*0.44f,-s*0.45f,s*0.44f,-s*0.45f,p); canvas.drawLine(-s*0.44f,s*0.45f,s*0.44f,s*0.45f,p)
-            }
-            ZodiacSign.CANCER -> {
-                val cr=s*0.18f; val ar=cr*2f; val ucy=-s*0.26f; val lcy=s*0.26f
-                canvas.drawCircle(-cr,ucy,cr,p); oval.set(-ar,ucy-ar,ar,ucy+ar); canvas.drawArc(oval,180f,180f,false,p)
-                canvas.drawCircle(cr,lcy,cr,p);  oval.set(-ar,lcy-ar,ar,lcy+ar); canvas.drawArc(oval,180f,-180f,false,p)
-            }
-            ZodiacSign.LEO -> {
-                canvas.drawCircle(-s*0.06f,s*0.22f,s*0.22f,p)
-                path.moveTo(-s*0.06f+s*0.22f,s*0.22f); path.cubicTo(s*0.52f,-s*0.62f,s*0.66f,s*0.15f,s*0.44f,s*0.5f)
-            }
-            ZodiacSign.VIRGO -> {
-                val yT=-s*0.28f; val yM=-s*0.7f; val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                canvas.drawLine(x1,yT,x1,s*0.12f,p)
-                path.moveTo(x1,yT); path.cubicTo(x1,yM,x2,yM,x2,yT); path.lineTo(x2,s*0.12f)
-                path.moveTo(x2,yT); path.cubicTo(x2,yM,x3,yM,x3,yT); path.lineTo(x3,s*0.4f)
-                path.cubicTo(x3-s*0.12f,s*0.56f,x3+s*0.35f,s*0.56f,x3+s*0.35f,s*0.3f)
-                path.cubicTo(x3+s*0.35f,s*0.1f,x3,s*0.1f,x3,s*0.12f)
-            }
-            ZodiacSign.LIBRA -> {
-                path.moveTo(-s*0.42f,0f); path.cubicTo(-s*0.42f,-s*0.55f,s*0.42f,-s*0.55f,s*0.42f,0f)
-                canvas.drawPath(path,p); path.reset()
-                canvas.drawLine(-s*0.62f,0f,s*0.62f,0f,p); canvas.drawLine(-s*0.58f,s*0.32f,s*0.58f,s*0.32f,p)
-            }
-            ZodiacSign.SCORPIO -> {
-                val yT=-s*0.28f; val yM=-s*0.7f; val yB=s*0.1f; val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                canvas.drawLine(x1,yT,x1,yB,p)
-                path.moveTo(x1,yT); path.cubicTo(x1,yM,x2,yM,x2,yT); path.lineTo(x2,yB)
-                path.moveTo(x2,yT); path.cubicTo(x2,yM,x3,yM,x3,yT); path.lineTo(x3,s*0.35f)
-                val ae=x3+s*0.42f; path.lineTo(ae,s*0.35f)
-                path.moveTo(ae-s*0.2f,s*0.18f); path.lineTo(ae,s*0.35f); path.lineTo(ae-s*0.2f,s*0.52f)
-            }
-            ZodiacSign.SAGITTARIUS -> {
-                canvas.drawLine(-s*0.38f,s*0.38f,s*0.42f,-s*0.42f,p)
-                canvas.drawLine(s*0.42f,-s*0.42f,s*0.15f,-s*0.42f,p); canvas.drawLine(s*0.42f,-s*0.42f,s*0.42f,-s*0.15f,p)
-                canvas.drawLine(-s*0.18f,-s*0.18f,s*0.18f,s*0.18f,p)
-            }
-            ZodiacSign.CAPRICORN -> {
-                val yT=-s*0.28f; val yM=-s*0.7f; val x1=-s*0.42f; val x2=0f; val x3=s*0.42f
-                path.moveTo(x1,yT); path.cubicTo(x1,yM,x2,yM,x2,yT); path.lineTo(x2,s*0.12f)
-                path.moveTo(x2,yT); path.cubicTo(x2,yM,x3,yM,x3,yT); path.lineTo(x3,s*0.4f)
-                path.cubicTo(x3-s*0.12f,s*0.56f,x3+s*0.35f,s*0.56f,x3+s*0.35f,s*0.3f)
-                path.cubicTo(x3+s*0.35f,s*0.1f,x3,s*0.1f,x3,s*0.12f)
-            }
-            ZodiacSign.AQUARIUS -> {
-                for (y in listOf(-s*0.18f, s*0.18f)) {
-                    path.moveTo(-s*0.5f,y); path.quadTo(-s*0.25f,y-s*0.24f,0f,y); path.quadTo(s*0.25f,y+s*0.24f,s*0.5f,y)
-                }
-            }
-            ZodiacSign.PISCES -> {
-                val r2=s*0.38f; val xO=s*0.48f
-                oval.set(-xO-r2,-r2,-xO+r2,r2); canvas.drawArc(oval,270f,180f,false,p)
-                oval.set(xO-r2,-r2,xO+r2,r2);   canvas.drawArc(oval,270f,-180f,false,p)
-                canvas.drawLine(-s*0.58f,0f,s*0.58f,0f,p)
-            }
-        }
-        canvas.drawPath(path, p)
-    }
 }
