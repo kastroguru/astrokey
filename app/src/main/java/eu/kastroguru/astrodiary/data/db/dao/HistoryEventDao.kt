@@ -10,6 +10,10 @@ interface HistoryEventDao {
     @Query("SELECT * FROM history_events ORDER BY year DESC, month DESC, day DESC")
     fun getAll(): Flow<List<HistoryEventEntity>>
 
+    /** Every event, oldest first — for export and for matching an import against the phone. */
+    @Query("SELECT * FROM history_events ORDER BY createdAt, id")
+    suspend fun getAllOnce(): List<HistoryEventEntity>
+
     @Query("SELECT * FROM history_events WHERE id = :id")
     suspend fun getById(id: Long): HistoryEventEntity?
 

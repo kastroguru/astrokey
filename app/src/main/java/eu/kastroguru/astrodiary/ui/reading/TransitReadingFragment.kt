@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
@@ -147,12 +148,12 @@ class TransitReadingFragment : Fragment() {
 
         val arrow = TextView(ctx).apply {
             text = "▾"
-            setTextColor(ctx.getColor(R.color.text_secondary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
             textSize = 14f
         }
         val title = TextView(ctx).apply {
             text = heading
-            setTextColor(ctx.getColor(R.color.text_primary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
             textSize = 16f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -162,14 +163,14 @@ class TransitReadingFragment : Fragment() {
             visibility = View.GONE
             addView(TextView(ctx).apply {
                 text = bodyText
-                setTextColor(ctx.getColor(R.color.text_secondary))
+                setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
                 textSize = 15f
                 setLineSpacing(0f, 1.15f)
                 updatePadding(top = (10 * d).toInt())
             })
             addView(TextView(ctx).apply {
                 text = getString(R.string.transit_reading_tap_for_dates)
-                setTextColor(ctx.getColor(R.color.gold))
+                setTextColor(ContextCompat.getColor(ctx, R.color.gold))
                 textSize = 13f
                 updatePadding(top = (10 * d).toInt())
                 isClickable = true
@@ -191,7 +192,7 @@ class TransitReadingFragment : Fragment() {
             })
             addView(TextView(ctx).apply {
                 text = phase
-                setTextColor(ctx.getColor(R.color.gold))
+                setTextColor(ContextCompat.getColor(ctx, R.color.gold))
                 textSize = 13f
                 updatePadding(top = (2 * d).toInt())
             })

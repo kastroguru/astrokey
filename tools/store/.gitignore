@@ -1,0 +1,4 @@
+# Inputs (emulator captures) and rendered output are regenerated, not kept.
+*.png
+*.html
+!store_icon.png

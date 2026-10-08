@@ -265,12 +265,8 @@ class TransitFragment : Fragment() {
         // Wire AspectsChartView
         val natal = state.natalData
         val transit = state.transitAstro
-        if (natal != null && transit != null) {
-            binding.aspectsChart.natalCusps = listOf(
-                natal.cusp1, natal.cusp2, natal.cusp3, natal.cusp4,
-                natal.cusp5, natal.cusp6, natal.cusp7, natal.cusp8,
-                natal.cusp9, natal.cusp10, natal.cusp11, natal.cusp12
-            )
+        if (natal != null && transit != null && state.natalCusps.size == 12) {
+            binding.aspectsChart.natalCusps = state.natalCusps
             binding.aspectsChart.natalPlanets = mapOf(
                 "sun" to natal.sunD, "moon" to natal.moonD,
                 "mercury" to natal.mercuryD, "venus" to natal.venusD,

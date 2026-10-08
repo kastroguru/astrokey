@@ -1,7 +1,5 @@
 package eu.kastroguru.astrodiary.ui.birthdata
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.data.network.NominatimResult
 import eu.kastroguru.astrodiary.databinding.FragmentBirthDataFormBinding
+import eu.kastroguru.astrodiary.ui.common.WheelPickers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.take
@@ -82,17 +81,17 @@ class BirthDataFormFragment : Fragment() {
         // Date picker
         updateDateLabel()
         binding.buttonPickDate.setOnClickListener {
-            DatePickerDialog(requireContext(), { _, y, m, d ->
-                selectedYear = y; selectedMonth = m + 1; selectedDay = d; updateDateLabel()
-            }, selectedYear, selectedMonth - 1, selectedDay).show()
+            WheelPickers.pickDate(requireContext(), selectedYear, selectedMonth, selectedDay) { y, m, d ->
+                selectedYear = y; selectedMonth = m; selectedDay = d; updateDateLabel()
+            }
         }
 
         // Time picker
         updateTimeLabel()
         binding.buttonPickTime.setOnClickListener {
-            TimePickerDialog(requireContext(), { _, h, m ->
+            WheelPickers.pickTime(requireContext(), selectedHour, selectedMinute) { h, m ->
                 selectedHour = h; selectedMinute = m; updateTimeLabel()
-            }, selectedHour, selectedMinute, true).show()
+            }
         }
 
         // City search
@@ -144,10 +143,16 @@ class BirthDataFormFragment : Fragment() {
                     is FormState.Success -> {
                         binding.progressBar.isVisible = false
                         viewModel.resetFormState()
-                        findNavController().navigate(
-                            R.id.action_birthDataFormFragment_to_chartFragment,
-                            Bundle().apply { putLong("birthDataId", state.id) }
-                        )
+                        if (editId > 0L) {
+                            // An edit returns to where it started — the list or the chart's
+                            // screen — which reloads the recalculated chart on its own.
+                            findNavController().popBackStack()
+                        } else {
+                            findNavController().navigate(
+                                R.id.action_birthDataFormFragment_to_chartFragment,
+                                Bundle().apply { putLong("birthDataId", state.id) }
+                            )
+                        }
                     }
                     is FormState.Error -> {
                         binding.progressBar.isVisible = false

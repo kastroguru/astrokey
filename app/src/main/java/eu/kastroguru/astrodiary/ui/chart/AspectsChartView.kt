@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import eu.kastroguru.astrodiary.R
+import eu.kastroguru.astrodiary.domain.calculator.AstroCalculator
 import eu.kastroguru.astrodiary.domain.model.AstroData
 import eu.kastroguru.astrodiary.domain.model.Element
 import eu.kastroguru.astrodiary.domain.model.Planet
@@ -121,6 +122,7 @@ class AspectsChartView @JvmOverloads constructor(
     // ── Build internal data ───────────────────────────────────────────────────
     private fun rebuild() {
         val transit = transitData ?: return
+        if (natalCusps.size != 12) return
 
         // Read AspectPrefs — same SharedPreferences as AstroChartView / Settings screen
         val prefs = context.getSharedPreferences("aspect_settings", Context.MODE_PRIVATE)
@@ -144,7 +146,10 @@ class AspectsChartView @JvmOverloads constructor(
                     deg         = pos.degreeInSign,
                     minutes     = pos.minutes,
                     signId      = pos.sign,
-                    house       = pos.house,
+                    // The natal house the transit is moving through. `pos.house` is the house in a
+                    // chart cast for the transit moment, whose houses turn through all twelve every
+                    // day: shown here it put neighbouring planets one house off, as if swapped.
+                    house       = AstroCalculator.planetHouse(pos.absoluteDegree, natalCusps),
                     absoluteDeg = pos.absoluteDegree,
                     elemColor   = elemColor(sign.element)
                 )
@@ -158,7 +163,7 @@ class AspectsChartView @JvmOverloads constructor(
             val signId = (absD / 30.0).toInt().coerceIn(0, 11) + 1
             val deg    = (absD % 30.0).toInt()
             val mins   = ((absD % 30.0 - deg) * 60.0).toInt()
-            val house  = planetHouse(absD, natalCusps)
+            val house  = AstroCalculator.planetHouse(absD, natalCusps)
             val sign   = ZodiacSign.fromId(signId)
             PlanetEntry(
                 planet      = planet,
@@ -217,16 +222,6 @@ class AspectsChartView @JvmOverloads constructor(
         }
         val shown = spreadAround(entries.map { it.pos }, half, 0.0, 30.0)
         entries.forEachIndexed { i, e -> e.shown = shown[i] }
-    }
-
-    private fun planetHouse(deg: Double, cusps: List<Double>): Int {
-        for (i in 0 until 12) {
-            val start = cusps.getOrElse(i) { 0.0 }
-            val end   = cusps.getOrElse((i + 1) % 12) { 0.0 }
-            val inArc = if (end > start) deg >= start && deg < end else deg >= start || deg < end
-            if (inArc) return i + 1
-        }
-        return 1
     }
 
     // ── Measure ───────────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.domain.calculator.TransitTimeline
 import java.text.SimpleDateFormat
@@ -61,9 +62,9 @@ class AspectStrengthView @JvmOverloads constructor(
         val d = data ?: return
         if (d.curve.size < 2) return
 
-        val accent = context.getColor(R.color.gold)
-        val secondary = context.getColor(R.color.text_secondary)
-        val stroke = context.getColor(R.color.card_stroke)
+        val accent = ContextCompat.getColor(context, R.color.gold)
+        val secondary = ContextCompat.getColor(context, R.color.text_secondary)
+        val stroke = ContextCompat.getColor(context, R.color.card_stroke)
 
         val padL = dp(26f); val padR = dp(10f); val padT = dp(10f); val padB = dp(26f)
         val w = width.toFloat(); val h = height.toFloat()

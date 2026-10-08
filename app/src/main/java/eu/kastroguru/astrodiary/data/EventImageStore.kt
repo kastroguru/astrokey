@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.InputStream
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,12 +26,24 @@ class EventImageStore @Inject constructor(
     /** Copies [uri] into internal storage; returns the new absolute path, or null on failure. */
     suspend fun save(uri: Uri): String? = withContext(Dispatchers.IO) {
         try {
-            val dest = File(dir, "${UUID.randomUUID()}.jpg")
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                dest.outputStream().use { output -> input.copyTo(output) }
-            } ?: return@withContext null
+            context.contentResolver.openInputStream(uri)?.use(::saveFrom)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Copies [input] into internal storage, leaving it open; returns the new absolute path, or null
+     * on failure. Blocking — call it off the main thread. Used by the import, which reads the photos
+     * straight out of the .astrokey archive.
+     */
+    fun saveFrom(input: InputStream): String? {
+        val dest = File(dir, "${UUID.randomUUID()}.jpg")
+        return try {
+            dest.outputStream().use { output -> input.copyTo(output) }
             dest.absolutePath
         } catch (e: Exception) {
+            dest.delete()
             null
         }
     }

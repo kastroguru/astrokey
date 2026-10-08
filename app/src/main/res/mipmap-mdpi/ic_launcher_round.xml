@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Legacy round launcher icon (API 21-25): the adaptive icon flattened onto a circle. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp"
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <path android:fillColor="#0D0D1A" android:pathData="M0,0 L48,0 L48,48 L0,48 Z" />
-    <path android:fillColor="#00000000" android:strokeColor="#FFD700" android:strokeWidth="2"
-        android:pathData="M24,4 A20,20 0 1,1 23.999,4 Z" />
-    <path android:fillColor="#FFD700"
-        android:pathData="M24,12 L26,19 L33,19 L27.5,23 L29.5,30 L24,26 L18.5,30 L20.5,23 L15,19 L22,19 Z" />
+
+    <path
+        android:fillColor="#FF1C1450"
+        android:pathData="M2,24 A22,22 0 1,1 46,24 A22,22 0 1,1 2,24 Z" />
+    <path
+        android:fillColor="#FFF4C65A"
+        android:pathData="M4.93,24 A19.07,19.07 0 1,1 43.07,24 A19.07,19.07 0 1,1 4.93,24 Z M6.52,24 A17.48,17.48 0 1,0 41.48,24 A17.48,17.48 0 1,0 6.52,24 Z" />
+    <path
+        android:fillColor="#FFF4C65A"
+        android:pathData="M24,10.86 L25.68,19.93 L30.7,17.3 L28.07,22.32 L37.14,24 L28.07,25.68 L30.7,30.7 L25.68,28.07 L24,37.14 L22.32,28.07 L17.3,30.7 L19.93,25.68 L10.86,24 L19.93,22.32 L17.3,17.3 L22.32,19.93 Z M21.8,24 A2.2,2.2 0 1,0 26.2,24 A2.2,2.2 0 1,0 21.8,24 Z"
+        android:strokeColor="#FFF4C65A"
+        android:strokeWidth="0.6"
+        android:strokeLineJoin="round" />
+
 </vector>

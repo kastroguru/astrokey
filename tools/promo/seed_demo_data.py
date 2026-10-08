@@ -88,22 +88,48 @@ def goto_tab(desc):
         ensure_app(hard=True)
     return False
 
+def wheels():
+    """Centres of the open date/time dialog's wheels, left to right
+    (bg: day, month, year — or hour, minute)."""
+    return sorted((n for n in N() if n['id'].endswith('/numberpicker_input')),
+                  key=lambda n: n['cx'])
+
+def type_wheel(i, value):
+    """Type into the i-th wheel. Re-read every time: the soft keyboard moves the dialog."""
+    w = wheels()
+    if i >= len(w): print('  MISS wheel', i, flush=True); return False
+    # Tapped twice: when the previous wheel commits a typed value the platform picker drops
+    # focus and closes the keyboard, so the first tap only lands the previous value.
+    tap_xy(w[i]['cx'], w[i]['cy'], 0.8)
+    tap_xy(w[i]['cx'], w[i]['cy'], 0.8)
+    adb('input','keyevent','123')                    # move to end
+    for _ in range(6):
+        adb('input','keyevent','67')                 # delete
+    type_text(str(value))
+    return True
+
 def pick_date(months_back, day):
     if not tap_id('buttonPickDate', 2): return False
+    w = wheels()
+    if len(w) != 3:
+        print('  MISS date wheels', flush=True); tap_id('button2'); return False
+    # Wheel order follows the locale (bg: day month year, en-US: month day year): the month is
+    # the one showing a name, the day the short number.
+    month = next(n for n in w if not n['text'].isdigit())
+    day_i = next(i for i, n in enumerate(w) if n['text'].isdigit() and len(n['text']) <= 2)
+    # The row above a wheel's centre turns it back by one; January → December carries the year.
+    row = month['bounds'][3] - month['bounds'][1]
     for _ in range(months_back):
-        n = by_id('prev')
-        if not n: print('  MISS prev', flush=True); return False
-        tap_xy(n['cx'], n['cy'], 0.45)
-    n = by_text(str(day), exact=True, ymin=1000, ymax=1620)
-    if not n:
-        print('  MISS day', day, flush=True); tap_id('button2'); return False
-    tap_xy(n['cx'], n['cy'], 1.0)
-    return tap_id('button1')
+        tap_xy(month['cx'], month['cy'] - row, 0.45)
+    type_wheel(day_i, day)
+    esc()
+    return tap_id('button1')                         # OK commits the typed value
 
 def pick_time(hh, mm):
     if not tap_id('buttonPickTime', 2): return False
-    tap_id('toggle_mode', 1.5)
-    type_text('%02d%02d' % (hh, mm))
+    type_wheel(0, '%02d' % hh)
+    type_wheel(1, '%02d' % mm)
+    esc()
     return tap_id('button1')
 
 def set_city(city):

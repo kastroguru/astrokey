@@ -207,6 +207,21 @@
     <string name="legal_gdpr_text">GDPR &amp; DATA USAGE\n\nLast updated: June 2026\n\n1. DATA CONTROLLER\nThe data controller for Astro Key is:\nKastro Guru\nEmail: kastroguru@gmail.com\n\n2. LEGAL BASIS FOR PROCESSING\nYour data is processed on the basis of your explicit consent, given when you enter it into the app (Article 6(1)(a) GDPR).\n\n3. WHAT DATA IS PROCESSED\n- Names (may be real or fictional — your choice)\n- Birth dates and times\n- Geographic locations (city, country, coordinates)\n- Personal diary entries and event notes\n\n4. PURPOSE OF PROCESSING\nData is processed solely to calculate and display astrological charts for your personal use within the app.\n\n5. DATA RETENTION\nYour data is retained on your device until you delete it. You can delete individual entries or all data from within the app at any time.\n\n6. YOUR GDPR RIGHTS\nAs a user in the EU you have the following rights:\n\n- Right of access: all your data is always visible within the app.\n- Right to rectification: you can edit any entry at any time.\n- Right to erasure (\"right to be forgotten\"): you can delete any or all entries at any time.\n- Right to data portability: use the export feature to obtain a copy of your data.\n- Right to object: you may stop using the app and delete all data at any time.\n- Right to withdraw consent: uninstalling the app constitutes withdrawal of consent.\n\n7. DATA TRANSFERS\nThis app does not transfer your data outside your device. If you have enabled Android Auto Backup, data may be stored in your Google account and is subject to Google\'s own privacy policy.\n\n8. COMPLAINTS\nIf you believe your data protection rights have been violated, you have the right to lodge a complaint with your national data protection authority.\n\n9. CONTACT\nFor GDPR requests: kastroguru@gmail.com</string>
 
     <!-- Import from Astro.com -->
+    <!-- Backup: export to / import from an .astrokey file -->
+    <string name="backup_section_title">Backup</string>
+    <string name="backup_section_desc">All your charts and events, with their photos, in one Astro Key file that you keep: on the phone, in Drive or wherever you choose. Importing a file adds what is missing and never changes or deletes anything.</string>
+    <string name="backup_export_btn">Export to file</string>
+    <string name="backup_import_btn">Import from file</string>
+    <string name="backup_exporting">Exporting…</string>
+    <string name="backup_importing">Importing…</string>
+    <string name="backup_export_done">Saved. Charts: %1$d · Events: %2$d · Photos: %3$d</string>
+    <string name="backup_nothing_to_export">There is nothing to export yet.</string>
+    <string name="backup_import_confirm_title">Import this file?</string>
+    <string name="backup_import_confirm_msg">Exported on %1$s.\nCharts: %2$d · Events: %3$d\n\nWhat is missing is added to what you already have. Nothing on the phone is changed or deleted.</string>
+    <string name="backup_import_done">Added. Charts: %1$d · Events: %2$d\nAlready on the phone, skipped. Charts: %3$d · Events: %4$d</string>
+    <string name="backup_error_not_astrokey">This is not an Astro Key file.</string>
+    <string name="backup_error_newer">This file comes from a newer version of Astro Key. Update the app and try again.</string>
+    <string name="backup_error_failed">It did not work: %1$s</string>
     <string name="import_section_title">Import Data</string>
     <string name="import_section_desc">Import saved birth charts from astro.com</string>
     <string name="import_astrocom_btn">Import from Astro.com</string>
@@ -261,6 +276,7 @@
     <string name="event_image_replace">Replace image</string>
     <string name="event_image_delete">Delete image</string>
     <string name="event_image_failed">Couldn\'t load that image.</string>
+    <string name="birth_data_deleted">\"%1$s\" deleted</string>
     <string name="event_deleted">"%1$s" deleted</string>
     <string name="undo">UNDO</string>
 
@@ -306,7 +322,7 @@
     <!-- The "?" in the toolbar: what each screen is for -->
     <string name="help_title">What is this screen?</string>
     <string name="help_got_it">Got it</string>
-    <string name="help_birth_data_list">The people whose charts you keep. Tap + to add someone — you can keep as many as you like, for yourself, your family or your clients. Tap a person to open their chart. Whoever you pick here stays selected on the other screens too.</string>
+    <string name="help_birth_data_list">The people whose charts you keep. Tap + to add someone — you can keep as many as you like, for yourself, your family or your clients. Tap a person to open their chart; slide them to the left to edit or delete. Whoever you pick here stays selected on the other screens too.</string>
     <string name="help_birth_data_form">Enter the date, the time and the place of birth. The time matters: it decides the Ascendant and the houses, so an hour off changes the chart. Type the city and tap Search — that fills in the coordinates and the time zone for you.</string>
     <string name="help_birth_data_detail">The chart wheel for this person, with the birth data underneath. "House cusps" are the boundaries of the twelve houses — the areas of life the chart is divided into. Tap the wheel, or Chart, to open it full screen.</string>
     <string name="help_chart">The wheel of the sky at that moment. The coloured ring on the outside holds the twelve signs; the numbered slices inside are the houses; the symbols are the planets, placed where they were. The lines across the middle are aspects — the angles between planets. The table underneath says the same thing in numbers.</string>
@@ -318,7 +334,7 @@
     <string name="help_transits">Where the planets are today compared with the birth chart you pick at the top. The list underneath shows the aspects that are active now, with how exact each one is and whether it is still building or already fading. Tap any row for the full explanation and its dates. The dropdown also switches to primary directions, a slower technique that moves the whole chart forward through life.</string>
     <string name="help_aspect_detail">What this particular meeting between two planets means, and when it matters: the day it comes into range, the day it is exact, and the day it fades. Outer planets often perfect the same aspect three times, because they turn back over the same degree — when that happens, the theme returns.</string>
     <string name="help_human_design">The bodygraph, built from the same birth data. The shapes are centres, the lines between them are channels. Underneath is the summary — type, strategy, authority, profile, definition — and then the sections that read the chart back to you: what is live today, where your openness conditions you, what you look for in others, the four arrows (how you take things in and what moves you), how to raise this person if they are a child, and a connection chart against a second person you pick.</string>
-    <string name="help_settings">Language, the house system used to divide the chart, which bodies count when aspects are calculated, and importing charts you already have from astro.com.</string>
+    <string name="help_settings">Language, the house system used to divide the chart, which bodies count when aspects are calculated, a backup of all your charts and events in a file you keep, and importing charts you already have from astro.com.</string>
 
     <string name="aspect_graph_title">How strong it is, over time</string>
     <string name="aspect_graph_now">now</string>

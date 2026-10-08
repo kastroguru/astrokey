@@ -22,6 +22,10 @@ interface BirthDataDao {
     @Query("SELECT * FROM birth_data WHERE year = :year ORDER BY month, day")
     fun getByYear(year: Int): Flow<List<BirthDataEntity>>
 
+    /** Every chart, oldest first — for export and for matching an import against the phone. */
+    @Query("SELECT * FROM birth_data ORDER BY createdAt, id")
+    suspend fun getAllOnce(): List<BirthDataEntity>
+
     @Query("SELECT * FROM birth_data WHERE id = :id")
     suspend fun getById(id: Long): BirthDataEntity?
 

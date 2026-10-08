@@ -1,7 +1,5 @@
 package eu.kastroguru.astrodiary.ui.events
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,6 +20,7 @@ import eu.kastroguru.astrodiary.R
 import eu.kastroguru.astrodiary.data.db.entity.BirthDataEntity
 import eu.kastroguru.astrodiary.data.network.NominatimResult
 import eu.kastroguru.astrodiary.databinding.FragmentEventFormBinding
+import eu.kastroguru.astrodiary.ui.common.WheelPickers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
@@ -129,15 +128,15 @@ class EventFormFragment : Fragment() {
         updateDateLabel(); updateTimeLabel()
 
         binding.buttonPickDate.setOnClickListener {
-            DatePickerDialog(requireContext(), { _, y, m, d ->
-                selectedYear = y; selectedMonth = m + 1; selectedDay = d; updateDateLabel()
-            }, selectedYear, selectedMonth - 1, selectedDay).show()
+            WheelPickers.pickDate(requireContext(), selectedYear, selectedMonth, selectedDay) { y, m, d ->
+                selectedYear = y; selectedMonth = m; selectedDay = d; updateDateLabel()
+            }
         }
 
         binding.buttonPickTime.setOnClickListener {
-            TimePickerDialog(requireContext(), { _, h, m ->
+            WheelPickers.pickTime(requireContext(), selectedHour, selectedMinute) { h, m ->
                 selectedHour = h; selectedMinute = m; updateTimeLabel()
-            }, selectedHour, selectedMinute, true).show()
+            }
         }
 
         binding.buttonSearchCity.setOnClickListener {

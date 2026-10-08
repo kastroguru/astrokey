@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -192,7 +193,7 @@ class SynastryFragment : Fragment() {
 
     private fun groupHeading(text: String) = TextView(requireContext()).apply {
         this.text = text
-        setTextColor(requireContext().getColor(R.color.gold))
+        setTextColor(ContextCompat.getColor(requireContext(), R.color.gold))
         textSize = 13f
         isAllCaps = true
         letterSpacing = 0.1f
@@ -211,7 +212,7 @@ class SynastryFragment : Fragment() {
 
         val arrow = TextView(ctx).apply {
             text = "▾"
-            setTextColor(ctx.getColor(R.color.text_secondary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
             textSize = 14f
         }
         // The unanswered cards are dimmed rather than coloured. A red mark would turn a reading
@@ -219,7 +220,7 @@ class SynastryFragment : Fragment() {
         val title = TextView(ctx).apply {
             text = heading
             alpha = if (met) 1f else 0.72f
-            setTextColor(ctx.getColor(R.color.text_primary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_primary))
             textSize = 15f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -231,14 +232,14 @@ class SynastryFragment : Fragment() {
         }
         val text = TextView(ctx).apply {
             this.text = body
-            setTextColor(ctx.getColor(R.color.text_secondary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
             textSize = 15f
             setLineSpacing(0f, 1.15f)
             updatePadding(top = (10 * d).toInt())
         }
         val small = TextView(ctx).apply {
             this.text = detail
-            setTextColor(ctx.getColor(R.color.text_secondary))
+            setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
             textSize = 11f
             alpha = 0.5f
             updatePadding(top = (8 * d).toInt())

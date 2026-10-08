@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher icon: a gold ring and the eight-ray sun-star of the Play icon.
+     Everything sits inside the 66dp safe circle, so no mask can crop the ring. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Ring, r 28.6..31.2 -->
+    <path android:pathData="M22.8,54 A31.2,31.2 0 1,1 85.2,54 A31.2,31.2 0 1,1 22.8,54 Z M25.4,54 A28.6,28.6 0 1,0 82.6,54 A28.6,28.6 0 1,0 25.4,54 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="22.8"
+                android:endX="54"
+                android:endY="85.2">
+                <item android:offset="0" android:color="#FFFFEDB2" />
+                <item android:offset="0.5" android:color="#FFF4C65A" />
+                <item android:offset="1" android:color="#FFD99A22" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Sun-star with an open centre; the thin round-joined stroke softens the tips -->
+    <path
+        android:pathData="M54,32.5 L56.76,47.35 L64.96,43.04 L60.65,51.24 L75.5,54 L60.65,56.76 L64.96,64.96 L56.76,60.65 L54,75.5 L51.24,60.65 L43.04,64.96 L47.35,56.76 L32.5,54 L47.35,51.24 L43.04,43.04 L51.24,47.35 Z M50.4,54 A3.6,3.6 0 1,0 57.6,54 A3.6,3.6 0 1,0 50.4,54 Z"
+        android:strokeWidth="1"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="32.5"
+                android:endX="54"
+                android:endY="75.5">
+                <item android:offset="0" android:color="#FFFFEDB2" />
+                <item android:offset="0.5" android:color="#FFF4C65A" />
+                <item android:offset="1" android:color="#FFD99A22" />
+            </gradient>
+        </aapt:attr>
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="32.5"
+                android:endX="54"
+                android:endY="75.5">
+                <item android:offset="0" android:color="#FFFFEDB2" />
+                <item android:offset="0.5" android:color="#FFF4C65A" />
+                <item android:offset="1" android:color="#FFD99A22" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+</vector>

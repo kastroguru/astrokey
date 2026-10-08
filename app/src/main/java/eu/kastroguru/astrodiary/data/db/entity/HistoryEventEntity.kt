@@ -2,7 +2,11 @@ package eu.kastroguru.astrodiary.data.db.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.squareup.moshi.JsonClass
 
+// Also the row format of the .astrokey export file (data/backup/AstroKeyArchive.kt): a field added
+// here needs a default value, or files exported before it can no longer be imported.
+@JsonClass(generateAdapter = true)
 @Entity(tableName = "history_events")
 data class HistoryEventEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

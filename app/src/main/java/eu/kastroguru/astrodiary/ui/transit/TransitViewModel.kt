@@ -66,6 +66,8 @@ enum class TransitMode { TRANSITS, PRIMARY_DIRECTIONS }
 data class TransitUiState(
     val natalData: BirthDataEntity? = null,
     val transitAstro: AstroData? = null,
+    /** Natal cusps in the house system chosen in Settings — the houses the transits move through. */
+    val natalCusps: List<Double> = emptyList(),
     val aspects: List<TransitAspect> = emptyList(),
     val allBirthData: List<BirthDataEntity> = emptyList(),
     val isLoading: Boolean = false,
@@ -228,8 +230,14 @@ class TransitViewModel @Inject constructor(
                         } else {
                             val transitAstro = calculator.calculate(year, month, day, hour, natal.latitude, natal.longitude)
                             val aspects = calculateAspects(transitAstro, natal)
+                            // Not the stored cusps: those are in whatever house system was active
+                            // when the chart was saved, while the wheel uses the current one.
+                            val natalCusps = calculator.recalculateCusps(
+                                natal.yearUtc, natal.monthUtc, natal.dayUtc, natal.hourUtc, natal.minutesUtc,
+                                natal.latitude, natal.longitude, chartDisplayPrefs.houseSystemChar
+                            )
                             _state.value.copy(
-                                transitAstro = transitAstro, aspects = aspects,
+                                transitAstro = transitAstro, natalCusps = natalCusps, aspects = aspects,
                                 isLoading = false, dateLabel = label, errorMessage = null,
                             )
                         }
@@ -316,6 +324,9 @@ class TransitViewModel @Inject constructor(
     }
 
     fun startLiveRefresh() {
+        // A date picked by hand is not recalculated by the loop below, yet the house system may have
+        // changed in Settings meanwhile — and the strip's houses follow it.
+        if (!_state.value.isLive && _state.value.mode == TransitMode.TRANSITS) calculate()
         refreshJob?.cancel()
         refreshJob = viewModelScope.launch {
             while (isActive) {

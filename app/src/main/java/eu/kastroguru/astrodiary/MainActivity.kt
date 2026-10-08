@@ -154,6 +154,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            // The forms are labelled "Add …" in the graph, and NavigationUI writes that label over
+            // any title a fragment sets, so an edit must be named here, after it has done so.
+            val editing = (destination.id == R.id.birthDataFormFragment && birthId != null) ||
+                (destination.id == R.id.eventFormFragment && eventId != null)
+            if (editing) supportActionBar?.title = getString(R.string.edit_birth_data)
+
             helpTextRes = ScreenHelp.forDestination(destination.id)
             helpScreenTitle = destination.label?.toString().orEmpty()
             invalidateOptionsMenu()
